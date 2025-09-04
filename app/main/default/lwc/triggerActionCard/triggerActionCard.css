@@ -21,12 +21,9 @@
 .slds-text-link:hover {
     text-decoration: underline;
 }
-
-/* Icon styling */
-.slds-icon-standard-flow {
-    --sds-c-icon-color-background: #0176d3;
+.icon-container {
+    background-color: #014486;
 }
-
 /* Badge styling */
 .slds-theme_success {
     background-color: #4bca81;
