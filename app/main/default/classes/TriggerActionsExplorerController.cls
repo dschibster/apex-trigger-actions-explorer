@@ -19,27 +19,6 @@ public with sharing class TriggerActionsExplorerController {
         }
     }
     
-    @AuraEnabled(cacheable=true)
-    public static List<Trigger_Action__mdt> getTriggerActions() {
-        try {
-            // Query actual Trigger Actions from custom metadata
-            // Note: Bypass_Execution__c = false means the action is ACTIVE
-            List<Trigger_Action__mdt> actions = [
-                SELECT Id, DeveloperName, Before_Insert__c, After_Insert__c, Before_Update__c, After_Update__c,
-                       Before_Delete__c, After_Delete__c, After_Undelete__c, Order__c, Bypass_Execution__c,
-                       Bypass_Permission__c, Required_Permission__c, Apex_Class_Name__c, Description__c,
-                       Entry_Criteria__c, Flow_Name__c, Allow_Flow_Recursion__c
-                FROM Trigger_Action__mdt
-                ORDER BY Order__c ASC, DeveloperName ASC
-            ];
-            
-            System.debug('Retrieved trigger actions: ' + actions.size());
-            return actions;
-        } catch (Exception e) {
-            System.debug('Error retrieving trigger actions: ' + e.getMessage());
-            throw new AuraHandledException('Error retrieving trigger actions: ' + e.getMessage());
-        }
-    }
     
     /**
      * Creates or updates a Trigger Action custom metadata record using the Metadata API
@@ -207,11 +186,11 @@ public with sharing class TriggerActionsExplorerController {
     }
     
     /**
-     * Forces a fresh query of trigger actions (bypasses any caching)
+     * Retrieves all Trigger Action custom metadata records
      * @return List of Trigger Action custom metadata records
      */
     @AuraEnabled(cacheable=false)
-    public static List<Trigger_Action__mdt> getTriggerActionsFresh() {
+    public static List<Trigger_Action__mdt> getTriggerActions() {
         try {
             System.debug('Executing fresh query for trigger actions...');
             

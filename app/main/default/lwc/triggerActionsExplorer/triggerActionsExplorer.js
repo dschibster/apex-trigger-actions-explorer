@@ -4,7 +4,6 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import getTriggerSettings from '@salesforce/apex/TriggerActionsExplorerController.getTriggerSettings';
 import getTriggerActions from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActions';
-import getTriggerActionsFresh from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActionsFresh';
 import upsertTriggerAction from '@salesforce/apex/TriggerActionsExplorerController.upsertTriggerAction';
 import getCurrentUserId from '@salesforce/apex/TriggerActionsExplorerController.getCurrentUserId';
 
@@ -108,32 +107,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         }
     }
 
-    async loadDataFresh() {
-        try {
-            console.log('Loading fresh data (bypassing cache)...');
-            
-            const [settings, actions] = await Promise.all([
-                getTriggerSettings(),
-                getTriggerActionsFresh() // Use fresh query that bypasses caching
-            ]);
-            
-            this.triggerSettings = settings || [];
-            this.triggerActions = actions || [];
-            
-            console.log('Fresh data loaded - Trigger Actions count:', this.triggerActions.length);
-            console.log('All trigger actions with order (fresh):');
-            this.triggerActions.forEach((action, index) => {
-                console.log(`  ${index}: ${action.DeveloperName} - Order: ${action.Order__c}`);
-            });
-            
-            // Always update display actions after loading data
-            this.updateDisplayActions();
-            
-        } catch (error) {
-            console.error('Error loading fresh data:', error);
-            throw error;
-        }
-    }
 
     async handleSettingChange(event) {
         this.selectedSetting = event.detail.value;
@@ -622,50 +595,21 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 const originalData = JSON.stringify(this.triggerActions);
                 console.log('Original data before platform event refresh:', originalData);
                 
-                // Implement retry mechanism to wait for data to actually change
-                const maxRetries = 10;
-                const retryDelay = 2000; // 2 seconds between retries
-                let dataChanged = false;
+                // Use fresh query (bypasses caching) without additional delays
+                console.log('Loading fresh data after platform event...');
+                await this.loadData();
                 
-                // Start with a longer initial delay since platform event might fire too early
-                console.log('Waiting 3 seconds for metadata to be fully committed...');
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // Check if data actually changed
+                const newData = JSON.stringify(this.triggerActions);
+                console.log('New data after platform event refresh:', newData);
+                const dataChanged = originalData !== newData;
+                console.log('Data changed:', dataChanged);
                 
-                for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                    console.log(`Platform event data refresh attempt ${attempt}/${maxRetries}`);
-                    
-                    // Wait before retrying (except on first attempt)
-                    if (attempt > 1) {
-                        console.log(`Waiting ${retryDelay}ms before retry...`);
-                        await new Promise(resolve => setTimeout(resolve, retryDelay));
-                    }
-                    
-                    // Refresh the data using fresh query (bypasses caching)
-                    console.log('Loading fresh data after platform event...');
-                    await this.loadDataFresh();
-                    
-                    // Check if data actually changed
-                    const newData = JSON.stringify(this.triggerActions);
-                    console.log('New data after platform event refresh:', newData);
-                    dataChanged = originalData !== newData;
-                    console.log('Data changed:', dataChanged);
-                    
-                    // Also log specific order values to see what's happening
-                    console.log('Order values in loaded data:');
-                    this.triggerActions.forEach((action, index) => {
-                        console.log(`  ${action.DeveloperName}: Order = ${action.Order__c}`);
-                    });
-                    
-                    if (dataChanged) {
-                        console.log('Data has changed! Proceeding with display update...');
-                        break;
-                    } else {
-                        console.log('Data not yet changed, will retry...');
-                        if (attempt === maxRetries) {
-                            console.log('Max retries reached, proceeding anyway...');
-                        }
-                    }
-                }
+                // Log specific order values to see what's happening
+                console.log('Order values in loaded data:');
+                this.triggerActions.forEach((action, index) => {
+                    console.log(`  ${action.DeveloperName}: Order = ${action.Order__c}`);
+                });
                 
                 // Log specific order values for debugging
                 console.log('All trigger actions after platform event refresh:');
