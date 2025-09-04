@@ -3,6 +3,8 @@ import { LightningElement, api } from 'lwc';
 export default class TriggerActionsSection extends LightningElement {
     @api title;
     @api actions;
+    
+    isExpanded = true;
 
     connectedCallback() {
         console.log('=== TriggerActionsSection connected ===');
@@ -37,6 +39,18 @@ export default class TriggerActionsSection extends LightningElement {
     handleDelete = (event) => {
         this.dispatchEvent(new CustomEvent('delete', { detail: event.detail }));
     };
+
+    handleToggle = () => {
+        this.isExpanded = !this.isExpanded;
+    };
+
+    get chevronIcon() {
+        return this.isExpanded ? 'utility:chevrondown' : 'utility:chevronright';
+    }
+
+    get chevronClass() {
+        return this.isExpanded ? 'slds-m-right_small' : 'slds-m-right_small';
+    }
 }
 
 
