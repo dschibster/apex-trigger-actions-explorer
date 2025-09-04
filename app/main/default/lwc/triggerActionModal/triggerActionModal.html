@@ -16,6 +16,16 @@
                 </header>
                 
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <!-- Loading Spinner for Update Operation -->
+                    <template if:true={isUpdating}>
+                        <div class="slds-is-relative slds-p-around_medium">
+                            <lightning-spinner alternative-text="Updating..." size="small"></lightning-spinner>
+                            <p class="slds-text-align_center slds-m-top_small">Updating Trigger Action...</p>
+                        </div>
+                    </template>
+                    
+                    <!-- Form Content (hidden during update) -->
+                    <template if:false={isUpdating}>
                     <lightning-layout multiple-rows="true">
                         <!-- Row 1: Description (full width) -->
                         <lightning-layout-item size="12" padding="around-small">
@@ -123,6 +133,7 @@
                             </lightning-textarea>
                         </lightning-layout-item>
                     </lightning-layout>
+                    </template>
                 </div>
                 
                 <footer class="slds-modal__footer">
@@ -149,6 +160,7 @@
                             variant="brand" 
                             label="Update" 
                             onclick={handleUpdate}
+                            disabled={isUpdating}
                             class="slds-m-left_small">
                         </lightning-button>
                     </template>

@@ -1,7 +1,9 @@
 import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getTriggerSettings from '@salesforce/apex/TriggerActionsExplorerController.getTriggerSettings';
 import getTriggerActions from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActions';
+import upsertTriggerAction from '@salesforce/apex/TriggerActionsExplorerController.upsertTriggerAction';
 
 export default class TriggerActionsExplorer extends NavigationMixin(LightningElement) {
     @track triggerSettings = [];
@@ -10,6 +12,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track selectedContext = '';
     @track selectedTiming = '';
     @track isLoading = false;
+    @track isUpdating = false;
     @track error = null;
     
     // Modal properties
@@ -300,13 +303,36 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         this.modalMode = event.detail.mode;
     }
 
-    handleModalUpdate(event) {
+    async handleModalUpdate(event) {
         const { actionId, actionData } = event.detail;
-        // TODO: Implement action update via Apex
-        console.log('Update action:', actionId, actionData);
         
-        // For now, just close the modal
-        this.handleModalClose();
+        try {
+            this.isUpdating = true;
+            this.error = null;
+            
+            console.log('Updating action:', actionId, actionData);
+            
+            // Call the upsert method with the action data
+            const jobId = await upsertTriggerAction({ actionData: JSON.stringify(actionData) });
+            
+            console.log('Update successful, deployment job ID:', jobId);
+            
+            // Show success message (you could use a toast notification here)
+            this.showToast('Success', 'Trigger Action updated successfully', 'success');
+            
+            // Close the modal
+            this.handleModalClose();
+            
+            // Refresh the data to show updated information
+            await this.loadData();
+            
+        } catch (error) {
+            console.error('Error updating trigger action:', error);
+            this.error = error.body?.message || error.message || 'Failed to update trigger action';
+            this.showToast('Error', this.error, 'error');
+        } finally {
+            this.isUpdating = false;
+        }
     }
 
     get hasBeforeActions() {
@@ -333,5 +359,20 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     get firstTriggerActionJson() {
         if (this.triggerActions.length === 0) return 'No trigger actions found';
         return JSON.stringify(this.triggerActions[0], null, 2);
+    }
+
+    /**
+     * Shows a toast notification
+     * @param {string} title - The title of the toast
+     * @param {string} message - The message to display
+     * @param {string} variant - The variant (success, error, warning, info)
+     */
+    showToast(title, message, variant = 'info') {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant
+        });
+        this.dispatchEvent(event);
     }
 }

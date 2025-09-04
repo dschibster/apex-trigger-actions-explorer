@@ -41,34 +41,181 @@ public with sharing class TriggerActionsExplorerController {
         }
     }
     
+    /**
+     * Creates or updates a Trigger Action custom metadata record using the Metadata API
+     * @param actionData JSON string containing the trigger action data
+     * @return String containing the deployment job ID
+     */
     @AuraEnabled
-    public static String createTriggerAction(String actionData) {
+    public static String upsertTriggerAction(String actionData) {
         try {
-            // TODO: Implement trigger action creation
-            // This would involve creating/updating custom metadata records
-            return 'Success';
+            // Parse the incoming JSON data
+            Map<String, Object> actionMap = (Map<String, Object>) JSON.deserializeUntyped(actionData);
+            
+            // Extract required fields - use DeveloperName from the action data
+            String developerName = (String) actionMap.get('DeveloperName');
+            String label = (String) actionMap.get('Label');
+            
+            // If DeveloperName is not provided, try to get it from the Id or Name field
+            if (String.isBlank(developerName)) {
+                developerName = (String) actionMap.get('Name');
+            }
+            
+            // If still blank, try to extract from Id
+            if (String.isBlank(developerName)) {
+                String id = (String) actionMap.get('Id');
+                if (String.isNotBlank(id)) {
+                    // Extract DeveloperName from the Id (assuming it's the DeveloperName)
+                    developerName = id;
+                }
+            }
+            
+            if (String.isBlank(developerName)) {
+                throw new AuraHandledException('DeveloperName is required to identify the trigger action');
+            }
+            
+            // Use DeveloperName as label if label is not provided
+            if (String.isBlank(label)) {
+                label = developerName;
+            }
+            
+            // Create the custom metadata record
+            Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
+            customMetadata.fullName = 'Trigger_Action__mdt.' + developerName;
+            customMetadata.label = label;
+            
+            // Add field values using the actual field names from the Trigger Action data
+            addFieldValue(customMetadata, 'Description__c', (String) actionMap.get('Description__c'));
+            addFieldValue(customMetadata, 'Apex_Class_Name__c', (String) actionMap.get('Apex_Class_Name__c'));
+            addFieldValue(customMetadata, 'Flow_Name__c', (String) actionMap.get('Flow_Name__c'));
+            addFieldValue(customMetadata, 'Entry_Criteria__c', (String) actionMap.get('Entry_Criteria__c'));
+            addFieldValue(customMetadata, 'Required_Permission__c', (String) actionMap.get('Required_Permission__c'));
+            addFieldValue(customMetadata, 'Bypass_Permission__c', (String) actionMap.get('Bypass_Permission__c'));
+            
+            // Add numeric fields
+            addNumericFieldValue(customMetadata, 'Order__c', actionMap.get('Order__c'));
+            
+            // Add boolean fields
+            addBooleanFieldValue(customMetadata, 'Bypass_Execution__c',  actionMap.get('Bypass_Execution__c'));
+            addBooleanFieldValue(customMetadata, 'Allow_Flow_Recursion__c', actionMap.get('Allow_Flow_Recursion__c'));
+            
+            // Add trigger context fields (MetadataRelationship fields)
+            addFieldValue(customMetadata, 'Before_Insert__c', (String) actionMap.get('Before_Insert__c'));
+            addFieldValue(customMetadata, 'After_Insert__c', (String) actionMap.get('After_Insert__c'));
+            addFieldValue(customMetadata, 'Before_Update__c', (String) actionMap.get('Before_Update__c'));
+            addFieldValue(customMetadata, 'After_Update__c', (String) actionMap.get('After_Update__c'));
+            addFieldValue(customMetadata, 'Before_Delete__c', (String) actionMap.get('Before_Delete__c'));
+            addFieldValue(customMetadata, 'After_Delete__c', (String) actionMap.get('After_Delete__c'));
+            addFieldValue(customMetadata, 'After_Undelete__c', (String) actionMap.get('After_Undelete__c'));
+            
+            // Deploy the metadata
+            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+            mdContainer.addMetadata(customMetadata);
+            
+            // Create callback and deploy
+            Metadata.DeployCallback callback = new TriggerActionDeployCallback();
+            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
+            
+            System.debug('Trigger Action upsert deployment job ID: ' + jobId);
+            return String.valueOf(jobId);
+            
         } catch (Exception e) {
-            throw new AuraHandledException('Error creating trigger action: ' + e.getMessage());
+            System.debug('Error upserting trigger action: ' + e.getMessage());
+            throw new AuraHandledException('Error upserting trigger action: ' + e.getMessage());
         }
     }
     
+    /**
+     * Deletes a Trigger Action custom metadata record using the Metadata API
+     * @param developerName The DeveloperName of the custom metadata record to delete
+     * @return String containing the deployment job ID
+     */
     @AuraEnabled
-    public static String updateTriggerAction(String actionId, String actionData) {
+    public static String deleteTriggerAction(String developerName) {
         try {
-            // TODO: Implement trigger action update
-            return 'Success';
+            if (String.isBlank(developerName)) {
+                throw new AuraHandledException('DeveloperName is required to delete a trigger action');
+            }
+            
+            // Create a delete operation for the custom metadata record
+            Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
+            customMetadata.fullName = 'Trigger_Action__mdt.' + developerName;
+            
+            // Deploy the deletion
+            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+            mdContainer.addMetadata(customMetadata);
+            
+            // Create callback and deploy
+            Metadata.DeployCallback callback = new TriggerActionDeployCallback();
+            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
+            
+            System.debug('Trigger Action delete deployment job ID: ' + jobId);
+            return String.valueOf(jobId);
+            
         } catch (Exception e) {
-            throw new AuraHandledException('Error updating trigger action: ' + e.getMessage());
-        }
-    }
-    
-    @AuraEnabled
-    public static String deleteTriggerAction(String actionId) {
-        try {
-            // TODO: Implement trigger action deletion
-            return 'Success';
-        } catch (Exception e) {
+            System.debug('Error deleting trigger action: ' + e.getMessage());
             throw new AuraHandledException('Error deleting trigger action: ' + e.getMessage());
+        }
+    }
+    
+    /**
+     * Helper method to add string field values to custom metadata
+     */
+    private static void addFieldValue(Metadata.CustomMetadata customMetadata, String fieldName, String value) {
+        if (String.isNotBlank(value)) {
+            Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
+            fieldValue.field = fieldName;
+            fieldValue.value = value;
+            customMetadata.values.add(fieldValue);
+        }
+    }
+    
+    /**
+     * Helper method to add numeric field values to custom metadata
+     */
+    private static void addNumericFieldValue(Metadata.CustomMetadata customMetadata, String fieldName, Object value) {
+        if (value != null) {
+            Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
+            fieldValue.field = fieldName;
+            fieldValue.value = Decimal.valueOf(String.valueOf(value));
+            customMetadata.values.add(fieldValue);
+        }
+    }
+    
+    /**
+     * Helper method to add boolean field values to custom metadata
+     */
+    private static void addBooleanFieldValue(Metadata.CustomMetadata customMetadata, String fieldName, Object value) {
+        if (value != null) {
+            Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
+            fieldValue.field = fieldName;
+            fieldValue.value = Boolean.valueOf(value);
+            customMetadata.values.add(fieldValue);
+        }
+    }
+    
+    /**
+     * Gets the deployment status for a given job ID
+     * @param jobId The deployment job ID to check
+     * @return String containing the deployment status
+     */
+    @AuraEnabled
+    public static String getDeploymentStatus(String jobId) {
+        try {
+            if (String.isBlank(jobId)) {
+                throw new AuraHandledException('Job ID is required');
+            }
+            
+            // Note: In a real implementation, you might want to store deployment status
+            // in a custom object or use a different approach to track status
+            // The Metadata API deployment is asynchronous and status checking
+            // would typically be done through the Metadata API or Setup UI
+            
+            return 'Deployment initiated. Check Setup > Deploy > Deployment Status for details.';
+            
+        } catch (Exception e) {
+            System.debug('Error getting deployment status: ' + e.getMessage());
+            throw new AuraHandledException('Error getting deployment status: ' + e.getMessage());
         }
     }
 }

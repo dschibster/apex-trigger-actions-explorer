@@ -4,6 +4,7 @@ export default class TriggerActionModal extends LightningElement {
     @api isOpen = false;
     @api action = {};
     @api mode = 'view'; // 'view' or 'edit'
+    @api isUpdating = false;
     
     @track actionData = {};
     @track originalData = {};
@@ -81,7 +82,6 @@ export default class TriggerActionModal extends LightningElement {
             }
         }));
         
-        // Close the modal after update
-        this.handleClose();
+        // Note: Modal will be closed by the parent component after successful update
     }
 }
