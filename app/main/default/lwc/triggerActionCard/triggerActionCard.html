@@ -1,6 +1,6 @@
 <template>
-    <div class="slds-list__item slds-border_bottom">
-        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-around_small">
+    <div class="slds-list__item slds-border_top">
+        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-around_x-small">
             <!-- Order Number -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <span class="slds-text-heading_small slds-text-color_weak">{action.Order__c}</span>
@@ -24,13 +24,13 @@
                     <div class="slds-grid slds-grid_wrap slds-grid_align-spread">
                         <div class="slds-grid slds-grid_wrap">
                             <a href={metadataUrl} target="_blank" class="slds-text-link">
-                                {displayName}
+                                <b>{displayName}</b>
                             </a>
                             <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
                             <span class="slds-text-color_weak slds-text-body_small">{actionType}</span>
                         </div>
                     </div>
-                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">{action.Description__c}</p>
+                    <p class="slds-text-body_small slds-text-color_weak">{action.Description__c}</p>
                 </div>
             </div>
             

@@ -1,5 +1,5 @@
 <template>
-    <div class="slds-card slds-m-bottom_medium">
+    <div class="slds-card">
         <div class="slds-card__header">
             <div class="slds-grid slds-grid_align-spread">
                 <div class="slds-media slds-media_center">
@@ -11,7 +11,7 @@
                 </div>
             </div>
         </div>
-        <div class="slds-card__body slds-p-horizontal_none">
+        <div class="slds-p-horizontal_none">
             <template if:true={actions}>
                 <div class="slds-list slds-has-dividers_top">
                     <template for:each={actions} for:item="act">
