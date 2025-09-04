@@ -6,6 +6,7 @@
 .sf/
 .sfdx/
 .localdevserver/
+.cursorrules
 deploy-options.json
 
 # LWC VSCode autocomplete
