@@ -72,34 +72,36 @@
                     <template if:true={selectedSetting}>
                         <template if:true={selectedContext}>
                             <template if:true={selectedTiming}>
-                            <!-- Before Section -->
-                            <template if:true={shouldShowBeforeActions}>
-                                <template if:true={beforeActions.length}>
-                                    <div class="slds-m-bottom_large">
-                                                                            <c-trigger-actions-section 
-                                        title="Before Actions" 
-                                        actions={beforeActions} 
-                                        onview={handleViewAction}
-                                        onedit={handleEditAction} 
-                                        ondelete={handleDeleteAction}>
-                                    </c-trigger-actions-section>
-                                    </div>
+                                <template if:true={showSections}>
+                                    <!-- Before Section -->
+                                    <template if:true={shouldShowBeforeActions}>
+                                        <template if:true={beforeActions.length}>
+                                            <div class="slds-m-bottom_large">
+                                                <c-trigger-actions-section 
+                                                    title="Before Actions" 
+                                                    actions={beforeActions} 
+                                                    onview={handleViewAction}
+                                                    onedit={handleEditAction} 
+                                                    ondelete={handleDeleteAction}>
+                                                </c-trigger-actions-section>
+                                            </div>
+                                        </template>
+                                    </template>
+                                    <!-- After Section -->
+                                    <template if:true={shouldShowAfterActions}>
+                                        <template if:true={afterActions.length}>
+                                            <div class="slds-m-bottom_large">
+                                                <c-trigger-actions-section 
+                                                    title="After Actions" 
+                                                    actions={afterActions} 
+                                                    onview={handleViewAction}
+                                                    onedit={handleEditAction} 
+                                                    ondelete={handleDeleteAction}>
+                                                </c-trigger-actions-section>
+                                            </div>
+                                        </template>
+                                    </template>
                                 </template>
-                            </template>
-                            <!-- After Section -->
-                            <template if:true={shouldShowAfterActions}>
-                                <template if:true={afterActions.length}>
-                                    <div class="slds-m-bottom_large">
-                                        <c-trigger-actions-section 
-                                            title="After Actions" 
-                                            actions={afterActions} 
-                                            onview={handleViewAction}
-                                            onedit={handleEditAction} 
-                                            ondelete={handleDeleteAction}>
-                                        </c-trigger-actions-section>
-                                    </div>
-                                </template>
-                            </template>
                             </template>
                             <template if:false={selectedTiming}>
                                 <div class="slds-text-align_center slds-p-around_large">

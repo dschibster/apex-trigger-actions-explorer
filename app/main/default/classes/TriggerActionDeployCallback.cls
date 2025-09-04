@@ -10,20 +10,43 @@ public class TriggerActionDeployCallback implements Metadata.DeployCallback {
      * @param context The deployment callback context
      */
     public void handleResult(Metadata.DeployResult result, Metadata.DeployCallbackContext context) {
-        if (result.status == Metadata.DeployStatus.Succeeded) {
-            System.debug('Trigger Action metadata deployment succeeded.');
-            System.debug('Deployment details: ' + result);
-        } else {
-            System.debug('Trigger Action metadata deployment failed.');
-            System.debug('Deployment status: ' + result.status);
-            System.debug('Error details: ' + result);
+        try {
+            // Get the current user ID
+            String currentUserId = UserInfo.getUserId();
             
-            // Log specific error messages if available
-            if (result.details != null && result.details.componentFailures != null) {
-                for (Metadata.DeployMessage failure : result.details.componentFailures) {
-                    System.debug('Component failure: ' + failure.fullName + ' - ' + failure.problem);
+            // Create platform event record
+            TriggerActionsExplorerCallback__e callbackEvent = new TriggerActionsExplorerCallback__e();
+            callbackEvent.UserId__c = currentUserId;
+            
+            if (result.status == Metadata.DeployStatus.Succeeded) {
+                System.debug('Trigger Action metadata deployment succeeded.');
+                System.debug('Deployment details: ' + result);
+                callbackEvent.Status__c = 'succeeded';
+            } else {
+                System.debug('Trigger Action metadata deployment failed.');
+                System.debug('Deployment status: ' + result.status);
+                System.debug('Error details: ' + result);
+                callbackEvent.Status__c = 'failed';
+                
+                // Log specific error messages if available
+                if (result.details != null && result.details.componentFailures != null) {
+                    for (Metadata.DeployMessage failure : result.details.componentFailures) {
+                        System.debug('Component failure: ' + failure.fullName + ' - ' + failure.problem);
+                    }
                 }
             }
+            
+            // Publish the platform event
+            Database.SaveResult publishResult = EventBus.publish(callbackEvent);
+            
+            if (publishResult.isSuccess()) {
+                System.debug('Platform event published successfully for user: ' + currentUserId);
+            } else {
+                System.debug('Failed to publish platform event: ' + publishResult.getErrors());
+            }
+            
+        } catch (Exception e) {
+            System.debug('Error in DeployCallback: ' + e.getMessage());
         }
     }
 }

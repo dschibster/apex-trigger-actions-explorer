@@ -1,9 +1,11 @@
 import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import getTriggerSettings from '@salesforce/apex/TriggerActionsExplorerController.getTriggerSettings';
 import getTriggerActions from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActions';
 import upsertTriggerAction from '@salesforce/apex/TriggerActionsExplorerController.upsertTriggerAction';
+import getCurrentUserId from '@salesforce/apex/TriggerActionsExplorerController.getCurrentUserId';
 
 export default class TriggerActionsExplorer extends NavigationMixin(LightningElement) {
     @track triggerSettings = [];
@@ -23,6 +25,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     // Reactive properties for display - these will be populated with Apex data
     @track beforeActions = [];
     @track afterActions = [];
+    @track showSections = true;
+    
+    // Platform event subscription properties
+    subscription = null;
+    channelName = '/event/TriggerActionsExplorerCallback__e';
     
     // Test property to see if component loads
     testProperty = 'Component loaded successfully!';
@@ -53,6 +60,12 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     connectedCallback() {
         // Load data when component connects
         this.loadData();
+        this.registerErrorListener();
+        this.subscribeToPlatformEvent();
+    }
+
+    disconnectedCallback() {
+        this.unsubscribeFromPlatformEvent();
     }
 
     async loadData() {
@@ -69,15 +82,18 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.triggerSettings = settings || [];
             this.triggerActions = actions || [];
             
+            console.log('Data loaded - Trigger Actions count:', this.triggerActions.length);
+            console.log('First action data:', this.triggerActions[0] ? JSON.stringify(this.triggerActions[0], null, 2) : 'No actions');
+            
             // Set default selection if data is available
             if (this.triggerSettings.length > 0) {
                 this.selectedSetting = this.triggerSettings[0].Id;
                 this.selectedContext = this.contextOptions[0].value;
                 this.selectedTiming = this.timingOptions[2].value; // Default to "Before and After"
-                
-                // Update display actions based on initial selection
-                this.updateDisplayActions();
             }
+            
+            // Always update display actions after loading data
+            this.updateDisplayActions();
             
         } catch (error) {
             console.error('Error loading data:', error);
@@ -103,30 +119,43 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     }
 
     updateDisplayActions() {
+        console.log('updateDisplayActions called');
+        console.log('Selected setting:', this.selectedSetting);
+        console.log('Selected context:', this.selectedContext);
+        console.log('Selected timing:', this.selectedTiming);
+        console.log('Trigger actions count:', this.triggerActions.length);
+        
+        // Force complete reset first
+        this.beforeActions = [];
+        this.afterActions = [];
+        
         if (!this.selectedSetting || !this.selectedContext || !this.selectedTiming) {
-            this.beforeActions = [];
-            this.afterActions = [];
+            console.log('Missing selections, returning early');
             return;
         }
         
         const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
         if (!setting) {
-            this.beforeActions = [];
-            this.afterActions = [];
+            console.log('Setting not found, returning early');
             return;
         }
         
+        console.log('Found setting:', setting.Object_API_Name__c);
+        
         // Get context fields to check based on the selected DML context
         const contextFields = this.getContextFields(this.selectedContext);
+        console.log('Context fields:', contextFields);
         
         // Filter actions that have the selected setting in any of the context fields
         const filteredActions = this.triggerActions.filter(action => 
             contextFields.some(field => action[field] === setting.Id)
         );
         
-        // Separate actions into before and after based on context
-        this.beforeActions = [];
-        this.afterActions = [];
+        console.log('Filtered actions count:', filteredActions.length);
+        
+        // Create new arrays to force reactivity
+        const newBeforeActions = [];
+        const newAfterActions = [];
         
         filteredActions.forEach(action => {
             // Check if action is configured for before context
@@ -150,7 +179,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                     Required_Permission__c: action.Required_Permission__c || null
                 };
                 
-                this.beforeActions.push(actionObj);
+                newBeforeActions.push(actionObj);
             }
             
             // Check if action is configured for after context
@@ -175,13 +204,26 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                     Required_Permission__c: action.Required_Permission__c || null
                 };
                 
-                this.afterActions.push(actionObj);
+                newAfterActions.push(actionObj);
             }
         });
         
         // Sort actions by order
-        this.beforeActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
-        this.afterActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
+        newBeforeActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
+        newAfterActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
+        
+        // Assign new arrays to trigger reactivity - ensure we're creating new array instances
+        this.beforeActions = [...newBeforeActions];
+        this.afterActions = [...newAfterActions];
+        
+        console.log('Display actions updated:');
+        console.log('Before actions:', this.beforeActions.length);
+        console.log('After actions:', this.afterActions.length);
+        console.log('Before actions data:', this.beforeActions);
+        console.log('After actions data:', this.afterActions);
+        
+        // Force a re-render by updating the main data array as well
+        this.triggerActions = [...this.triggerActions];
     }
 
     isBeforeContext(context) {
@@ -297,6 +339,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         this.isModalOpen = false;
         this.selectedAction = {};
         this.modalMode = 'view';
+        this.isUpdating = false; // Reset updating state
     }
 
     handleModalModeChange(event) {
@@ -317,11 +360,12 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             
             console.log('Update initiated, deployment job ID:', jobId);
             
-            // Since we can't reliably poll deployment status with enqueueDeployment(),
-            // we'll provide immediate feedback and let the callback handle the actual result
-            this.showToast('Success', 'Trigger Action update initiated successfully', 'success');
-            this.handleModalClose();
-            await this.loadData(); // Refresh data
+            // Keep modal open and show loading spinner during deployment
+            console.log('Deployment initiated, keeping modal open with loading spinner');
+            console.log('Waiting for platform event callback...');
+            
+            // The modal will stay open with loading spinner until the platform event callback
+            // handles the deployment completion and closes the modal
             
         } catch (error) {
             console.error('Error updating trigger action:', error);
@@ -329,7 +373,8 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.showToast('Error', errorMessage, 'error');
             // Don't set this.error as it affects the entire view
             // The modal will remain open for the user to retry
-        } finally {
+            
+            // Reset updating state after error
             this.isUpdating = false;
         }
     }
@@ -360,6 +405,80 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         return JSON.stringify(this.triggerActions[0], null, 2);
     }
 
+    /**
+     * Refreshes data with retry mechanism to handle asynchronous metadata deployment
+     */
+    async refreshDataWithRetry() {
+        const maxRetries = 3;
+        const retryDelay = 2000; // 2 seconds
+        
+        // Store the current action data to detect changes
+        const originalActionData = JSON.stringify(this.triggerActions);
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`Refreshing data (attempt ${attempt}/${maxRetries})`);
+                
+                // Wait before retrying (except on first attempt)
+                if (attempt > 1) {
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
+                
+                // Try to load fresh data
+                await this.loadData();
+                
+                // Check if data actually changed
+                const currentActionData = JSON.stringify(this.triggerActions);
+                console.log('Original data length:', originalActionData.length);
+                console.log('Current data length:', currentActionData.length);
+                console.log('Data changed:', currentActionData !== originalActionData);
+                
+                if (currentActionData !== originalActionData || attempt === maxRetries) {
+                    console.log('Data refresh successful - data has changed');
+                    
+                    // Force a re-render by updating a tracked property
+                    this.triggerActions = [...this.triggerActions];
+                    
+                    // Now update display with fresh data (this will force complete reset)
+                    this.updateDisplayActions();
+                    console.log('Display actions updated. Before actions:', this.beforeActions.length, 'After actions:', this.afterActions.length);
+                    return;
+                }
+                
+                console.log('Data not yet updated, will retry...');
+                
+            } catch (error) {
+                console.error(`Data refresh attempt ${attempt} failed:`, error);
+                
+                if (attempt === maxRetries) {
+                    console.error('All data refresh attempts failed');
+                    this.showToast('Warning', 'Data refresh failed. Please refresh the page manually.', 'warning');
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Forces a complete component refresh by temporarily hiding and showing sections
+     */
+    forceComponentRefresh() {
+        console.log('Forcing component refresh...');
+        
+        // Temporarily hide the sections
+        this.showSections = false;
+        
+        // Force a re-render by updating arrays
+        this.triggerActions = [...this.triggerActions];
+        this.beforeActions = [...this.beforeActions];
+        this.afterActions = [...this.afterActions];
+        
+        // Use setTimeout to show sections again after the DOM updates
+        setTimeout(() => {
+            this.showSections = true;
+            console.log('Component refresh completed');
+        }, 100);
+    }
 
     /**
      * Shows a toast notification
@@ -374,5 +493,115 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             variant: variant
         });
         this.dispatchEvent(event);
+    }
+
+    /**
+     * Registers error listener for platform events
+     */
+    registerErrorListener() {
+        onError(error => {
+            console.error('Platform event error:', error);
+        });
+    }
+
+    /**
+     * Subscribes to the TriggerActionsExplorerCallback platform event
+     */
+    async subscribeToPlatformEvent() {
+        const messageCallback = async (response) => {
+            console.log('Platform event received:', response);
+            
+            // Check if this event is for the current user
+            const eventData = response.data.payload;
+            const currentUserId = await this.getCurrentUserId();    
+            console.log('Current user ID:', currentUserId);
+            
+            if (eventData.UserId__c === currentUserId) {
+                console.log('Deployment callback received for current user');
+                this.handleDeploymentCallback(eventData.Status__c);
+            } else {
+                console.log('Deployment callback received for different user, ignoring');
+            }
+        };
+
+        // Subscribe to the platform event
+        subscribe(this.channelName, -1, messageCallback).then(response => {
+            console.log('Successfully subscribed to platform event:', response);
+            this.subscription = response;
+        }).catch(error => {
+            console.error('Error subscribing to platform event:', error);
+        });
+    }
+
+    /**
+     * Unsubscribes from the platform event
+     */
+    unsubscribeFromPlatformEvent() {
+        if (this.subscription) {
+            unsubscribe(this.subscription, response => {
+                console.log('Successfully unsubscribed from platform event:', response);
+            });
+            this.subscription = null;
+        }
+    }
+
+    /**
+     * Gets the current user ID from Apex
+     */
+    async getCurrentUserId() {
+        try {
+            const userId = await getCurrentUserId();
+            return userId;
+        } catch (error) {
+            console.error('Error getting current user ID:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Handles deployment callback from platform event
+     * @param {string} status - The deployment status (succeeded, failed)
+     */
+    async handleDeploymentCallback(status) {
+        console.log('Handling deployment callback with status:', status);
+        
+        if (status === 'succeeded') {
+            console.log('Deployment succeeded, refreshing data...');
+            
+            try {
+                // Refresh the data
+                await this.loadData();
+                
+                // Force complete reset and refresh
+                this.beforeActions = [];
+                this.afterActions = [];
+                
+                // Update display with fresh data
+                this.updateDisplayActions();
+                
+                // Force a re-render by updating the main data array
+                this.triggerActions = [...this.triggerActions];
+                
+                // Force component refresh to handle Proxy object issues
+                this.forceComponentRefresh();
+                
+                console.log('Data refreshed successfully after deployment');
+                
+                // Close modal and show success message
+                this.showToast('Success', 'Trigger Action updated successfully', 'success');
+                this.handleModalClose();
+                
+            } catch (error) {
+                console.error('Error refreshing data after deployment:', error);
+                this.showToast('Warning', 'Data refresh failed. Please refresh the page manually.', 'warning');
+            }
+            
+        } else if (status === 'failed') {
+            console.error('Deployment failed');
+            this.showToast('Error', 'Deployment failed. Please try again.', 'error');
+        }
+        
+        // Reset updating state
+        this.isUpdating = false;
     }
 }

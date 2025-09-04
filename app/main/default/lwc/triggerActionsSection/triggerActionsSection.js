@@ -52,5 +52,3 @@ export default class TriggerActionsSection extends LightningElement {
         return this.isExpanded ? 'slds-m-right_small' : 'slds-m-right_small';
     }
 }
-
-

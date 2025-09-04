@@ -9,13 +9,14 @@ export default class TriggerActionModal extends LightningElement {
     @track actionData = {};
     @track originalData = {};
     @track modalError = null;
+    @track _currentActionId = null;
 
     connectedCallback() {
         this.initializeData();
     }
 
     renderedCallback() {
-        // Only initialize data when modal opens, not on every render
+        // Only initialize data when modal opens and data is not already initialized
         if (this.isOpen && (!this.actionData || Object.keys(this.actionData).length === 0)) {
             this.initializeData();
         }
@@ -26,6 +27,26 @@ export default class TriggerActionModal extends LightningElement {
             // Create a deep copy of the action data
             this.actionData = JSON.parse(JSON.stringify(this.action));
             this.originalData = JSON.parse(JSON.stringify(this.action));
+        } else {
+            // Clear data if no action
+            this.actionData = {};
+            this.originalData = {};
+        }
+    }
+
+    // Watch for changes to the action property
+    get action() {
+        return this._action;
+    }
+
+    set action(value) {
+        // Only update if the action ID actually changed
+        const newActionId = value?.Id || null;
+        if (this._currentActionId !== newActionId) {
+            this._action = value;
+            this._currentActionId = newActionId;
+            // Re-initialize data when action changes
+            this.initializeData();
         }
     }
 
@@ -79,6 +100,8 @@ export default class TriggerActionModal extends LightningElement {
     handleClose() {
         // Clear any errors when closing
         this.modalError = null;
+        // Reset mode to view
+        this.mode = 'view';
         this.dispatchEvent(new CustomEvent('close'));
     }
 

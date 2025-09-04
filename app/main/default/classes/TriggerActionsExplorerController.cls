@@ -117,6 +117,9 @@ public with sharing class TriggerActionsExplorerController {
             Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
             
             System.debug('Trigger Action upsert deployment job ID: ' + jobId);
+            System.debug('Deployment initiated for: ' + developerName);
+            System.debug('Custom metadata values: ' + customMetadata.values);
+            
             return String.valueOf(jobId);
             
         } catch (Exception e) {
@@ -195,30 +198,12 @@ public with sharing class TriggerActionsExplorerController {
     }
     
     /**
-     * Gets the deployment status for a given job ID
-     * Note: Since we use enqueueDeployment(), we can't directly check status via Metadata API.
-     * The deployment status is handled by the DeployCallback.
-     * This method is kept for compatibility but returns a simple status.
-     * @param jobId The deployment job ID to check
-     * @return String containing the deployment status
+     * Gets the current user ID for platform event filtering
+     * @return String containing the current user ID
      */
     @AuraEnabled
-    public static String getDeploymentStatus(String jobId) {
-        try {
-            if (String.isBlank(jobId)) {
-                throw new AuraHandledException('Job ID is required');
-            }
-            
-            // Since we use enqueueDeployment(), the actual deployment status
-            // is handled by the DeployCallback. For this demo, we'll return
-            // 'succeeded' to indicate the deployment was initiated successfully.
-            // The actual success/failure is logged in the callback.
-            
-            return 'succeeded';
-            
-        } catch (Exception e) {
-            System.debug('Error getting deployment status: ' + e.getMessage());
-            return 'unknown';
-        }
+    public static String getCurrentUserId() {
+        return UserInfo.getUserId();
     }
+    
 }
