@@ -16,6 +16,15 @@
                 </header>
                 
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <!-- Error Display -->
+                    <template if:true={modalError}>
+                        <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error slds-m-bottom_medium" role="alert">
+                            <span class="slds-assistive-text">error</span>
+                            <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
+                            <h2>{modalError}</h2>
+                        </div>
+                    </template>
+                    
                     <!-- Loading Spinner for Update Operation -->
                     <template if:true={isUpdating}>
                         <div class="slds-is-relative slds-p-around_medium">

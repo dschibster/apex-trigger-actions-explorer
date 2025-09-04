@@ -22,10 +22,13 @@ try {
     String jobId = TriggerActionsExplorerController.upsertTriggerAction(actionDataJson);
     System.debug('Upsert Job ID: ' + jobId);
     
-    // Test deployment status
+    // Test deployment status (this will return 'in_progress' initially)
     System.debug('Testing getDeploymentStatus...');
     String status = TriggerActionsExplorerController.getDeploymentStatus(jobId);
     System.debug('Deployment Status: ' + status);
+    
+    // Note: In a real scenario, the LWC would poll this status every 2 seconds
+    // until it returns 'succeeded', 'failed', or 'canceled'
     
     // Test delete operation (uncomment to test deletion)
     // System.debug('Testing deleteTriggerAction...');

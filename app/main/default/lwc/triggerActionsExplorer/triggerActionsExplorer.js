@@ -308,28 +308,27 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         
         try {
             this.isUpdating = true;
-            this.error = null;
+            // Don't clear the main error here - keep it separate from modal errors
             
             console.log('Updating action:', actionId, actionData);
             
             // Call the upsert method with the action data
             const jobId = await upsertTriggerAction({ actionData: JSON.stringify(actionData) });
             
-            console.log('Update successful, deployment job ID:', jobId);
+            console.log('Update initiated, deployment job ID:', jobId);
             
-            // Show success message (you could use a toast notification here)
-            this.showToast('Success', 'Trigger Action updated successfully', 'success');
-            
-            // Close the modal
+            // Since we can't reliably poll deployment status with enqueueDeployment(),
+            // we'll provide immediate feedback and let the callback handle the actual result
+            this.showToast('Success', 'Trigger Action update initiated successfully', 'success');
             this.handleModalClose();
-            
-            // Refresh the data to show updated information
-            await this.loadData();
+            await this.loadData(); // Refresh data
             
         } catch (error) {
             console.error('Error updating trigger action:', error);
-            this.error = error.body?.message || error.message || 'Failed to update trigger action';
-            this.showToast('Error', this.error, 'error');
+            const errorMessage = error.body?.message || error.message || 'Failed to update trigger action';
+            this.showToast('Error', errorMessage, 'error');
+            // Don't set this.error as it affects the entire view
+            // The modal will remain open for the user to retry
         } finally {
             this.isUpdating = false;
         }
@@ -360,6 +359,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         if (this.triggerActions.length === 0) return 'No trigger actions found';
         return JSON.stringify(this.triggerActions[0], null, 2);
     }
+
 
     /**
      * Shows a toast notification

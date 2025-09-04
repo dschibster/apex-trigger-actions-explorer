@@ -8,6 +8,7 @@ export default class TriggerActionModal extends LightningElement {
     
     @track actionData = {};
     @track originalData = {};
+    @track modalError = null;
 
     connectedCallback() {
         this.initializeData();
@@ -53,10 +54,6 @@ export default class TriggerActionModal extends LightningElement {
         };
     }
 
-    handleClose() {
-        this.dispatchEvent(new CustomEvent('close'));
-    }
-
     handleEdit() {
         this.mode = 'edit';
         this.dispatchEvent(new CustomEvent('modechange', {
@@ -64,16 +61,10 @@ export default class TriggerActionModal extends LightningElement {
         }));
     }
 
-    handleCancel() {
-        // Restore original data
-        this.actionData = JSON.parse(JSON.stringify(this.originalData));
-        this.mode = 'view';
-        this.dispatchEvent(new CustomEvent('modechange', {
-            detail: { mode: 'view' }
-        }));
-    }
-
     handleUpdate() {
+        // Clear any previous errors
+        this.modalError = null;
+        
         // Dispatch update event with the modified data
         this.dispatchEvent(new CustomEvent('update', {
             detail: { 
@@ -83,5 +74,22 @@ export default class TriggerActionModal extends LightningElement {
         }));
         
         // Note: Modal will be closed by the parent component after successful update
+    }
+
+    handleClose() {
+        // Clear any errors when closing
+        this.modalError = null;
+        this.dispatchEvent(new CustomEvent('close'));
+    }
+
+    handleCancel() {
+        // Clear any errors when canceling
+        this.modalError = null;
+        // Restore original data
+        this.actionData = JSON.parse(JSON.stringify(this.originalData));
+        this.mode = 'view';
+        this.dispatchEvent(new CustomEvent('modechange', {
+            detail: { mode: 'view' }
+        }));
     }
 }
