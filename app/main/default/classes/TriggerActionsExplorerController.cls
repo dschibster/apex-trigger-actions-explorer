@@ -206,4 +206,34 @@ public with sharing class TriggerActionsExplorerController {
         return UserInfo.getUserId();
     }
     
+    /**
+     * Forces a fresh query of trigger actions (bypasses any caching)
+     * @return List of Trigger Action custom metadata records
+     */
+    @AuraEnabled(cacheable=false)
+    public static List<Trigger_Action__mdt> getTriggerActionsFresh() {
+        try {
+            System.debug('Executing fresh query for trigger actions...');
+            
+            // Query all Trigger Action custom metadata records
+            List<Trigger_Action__mdt> actions = [
+                SELECT Id, DeveloperName, Label, Description__c, Order__c, 
+                       Required_Permission__c, Bypass_Execution__c, Bypass_Permission__c,
+                       Apex_Class_Name__c, Flow_Name__c, Allow_Flow_Recursion__c,
+                       Entry_Criteria__c, Before_Insert__c, After_Insert__c,
+                       Before_Update__c, After_Update__c, Before_Delete__c,
+                       After_Delete__c, After_Undelete__c
+                FROM Trigger_Action__mdt
+                ORDER BY Order__c ASC, DeveloperName ASC
+            ];
+            
+            System.debug('Fresh query returned ' + actions.size() + ' trigger actions');
+            return actions;
+            
+        } catch (Exception e) {
+            System.debug('Error in fresh trigger actions query: ' + e.getMessage());
+            throw new AuraHandledException('Error retrieving trigger actions: ' + e.getMessage());
+        }
+    }
+    
 }

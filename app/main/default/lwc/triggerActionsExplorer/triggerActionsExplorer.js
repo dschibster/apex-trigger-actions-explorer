@@ -4,6 +4,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import getTriggerSettings from '@salesforce/apex/TriggerActionsExplorerController.getTriggerSettings';
 import getTriggerActions from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActions';
+import getTriggerActionsFresh from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActionsFresh';
 import upsertTriggerAction from '@salesforce/apex/TriggerActionsExplorerController.upsertTriggerAction';
 import getCurrentUserId from '@salesforce/apex/TriggerActionsExplorerController.getCurrentUserId';
 
@@ -83,6 +84,10 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.triggerActions = actions || [];
             
             console.log('Data loaded - Trigger Actions count:', this.triggerActions.length);
+            console.log('All trigger actions with order:');
+            this.triggerActions.forEach((action, index) => {
+                console.log(`  ${index}: ${action.DeveloperName} - Order: ${action.Order__c}`);
+            });
             console.log('First action data:', this.triggerActions[0] ? JSON.stringify(this.triggerActions[0], null, 2) : 'No actions');
             
             // Set default selection if data is available
@@ -100,6 +105,33 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.error = error.message || 'Failed to load data';
         } finally {
             this.isLoading = false;
+        }
+    }
+
+    async loadDataFresh() {
+        try {
+            console.log('Loading fresh data (bypassing cache)...');
+            
+            const [settings, actions] = await Promise.all([
+                getTriggerSettings(),
+                getTriggerActionsFresh() // Use fresh query that bypasses caching
+            ]);
+            
+            this.triggerSettings = settings || [];
+            this.triggerActions = actions || [];
+            
+            console.log('Fresh data loaded - Trigger Actions count:', this.triggerActions.length);
+            console.log('All trigger actions with order (fresh):');
+            this.triggerActions.forEach((action, index) => {
+                console.log(`  ${index}: ${action.DeveloperName} - Order: ${action.Order__c}`);
+            });
+            
+            // Always update display actions after loading data
+            this.updateDisplayActions();
+            
+        } catch (error) {
+            console.error('Error loading fresh data:', error);
+            throw error;
         }
     }
 
@@ -211,6 +243,10 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         // Sort actions by order
         newBeforeActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
         newAfterActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
+        
+        console.log('After sorting:');
+        console.log('New before actions order:', newBeforeActions.map(a => `${a.DeveloperName}:${a.Order__c}`));
+        console.log('New after actions order:', newAfterActions.map(a => `${a.DeveloperName}:${a.Order__c}`));
         
         // Assign new arrays to trigger reactivity - ensure we're creating new array instances
         this.beforeActions = [...newBeforeActions];
@@ -365,7 +401,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             console.log('Waiting for platform event callback...');
             
             // The modal will stay open with loading spinner until the platform event callback
-            // handles the deployment completion and closes the modal
+            // handles the deployment completion and refreshes the data
             
         } catch (error) {
             console.error('Error updating trigger action:', error);
@@ -468,15 +504,28 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         // Temporarily hide the sections
         this.showSections = false;
         
-        // Force a re-render by updating arrays
+        // Force a re-render by updating arrays with completely new instances
         this.triggerActions = [...this.triggerActions];
         this.beforeActions = [...this.beforeActions];
         this.afterActions = [...this.afterActions];
         
-        // Use setTimeout to show sections again after the DOM updates
+        // Also force update the selected values to trigger reactivity
+        const currentSetting = this.selectedSetting;
+        const currentContext = this.selectedContext;
+        const currentTiming = this.selectedTiming;
+        
+        // Temporarily clear and reset selections
+        this.selectedSetting = '';
+        this.selectedContext = '';
+        this.selectedTiming = '';
+        
+        // Use setTimeout to show sections and restore selections after the DOM updates
         setTimeout(() => {
             this.showSections = true;
-            console.log('Component refresh completed');
+            this.selectedSetting = currentSetting;
+            this.selectedContext = currentContext;
+            this.selectedTiming = currentTiming;
+            console.log('Component refresh completed with selections restored');
         }, 100);
     }
 
@@ -566,33 +615,117 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         console.log('Handling deployment callback with status:', status);
         
         if (status === 'succeeded') {
-            console.log('Deployment succeeded, refreshing data...');
+            console.log('Deployment succeeded, refreshing data from platform event...');
             
             try {
-                // Refresh the data
-                await this.loadData();
+                // Store original data for comparison
+                const originalData = JSON.stringify(this.triggerActions);
+                console.log('Original data before platform event refresh:', originalData);
+                
+                // Implement retry mechanism to wait for data to actually change
+                const maxRetries = 10;
+                const retryDelay = 2000; // 2 seconds between retries
+                let dataChanged = false;
+                
+                // Start with a longer initial delay since platform event might fire too early
+                console.log('Waiting 3 seconds for metadata to be fully committed...');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    console.log(`Platform event data refresh attempt ${attempt}/${maxRetries}`);
+                    
+                    // Wait before retrying (except on first attempt)
+                    if (attempt > 1) {
+                        console.log(`Waiting ${retryDelay}ms before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    }
+                    
+                    // Refresh the data using fresh query (bypasses caching)
+                    console.log('Loading fresh data after platform event...');
+                    await this.loadDataFresh();
+                    
+                    // Check if data actually changed
+                    const newData = JSON.stringify(this.triggerActions);
+                    console.log('New data after platform event refresh:', newData);
+                    dataChanged = originalData !== newData;
+                    console.log('Data changed:', dataChanged);
+                    
+                    // Also log specific order values to see what's happening
+                    console.log('Order values in loaded data:');
+                    this.triggerActions.forEach((action, index) => {
+                        console.log(`  ${action.DeveloperName}: Order = ${action.Order__c}`);
+                    });
+                    
+                    if (dataChanged) {
+                        console.log('Data has changed! Proceeding with display update...');
+                        break;
+                    } else {
+                        console.log('Data not yet changed, will retry...');
+                        if (attempt === maxRetries) {
+                            console.log('Max retries reached, proceeding anyway...');
+                        }
+                    }
+                }
+                
+                // Log specific order values for debugging
+                console.log('All trigger actions after platform event refresh:');
+                this.triggerActions.forEach((action, index) => {
+                    console.log(`Action ${index}: ${action.DeveloperName}, Order: ${action.Order__c}`);
+                });
                 
                 // Force complete reset and refresh
                 this.beforeActions = [];
                 this.afterActions = [];
+                console.log('Display arrays reset');
                 
                 // Update display with fresh data
                 this.updateDisplayActions();
+                console.log('Display actions updated');
+                
+                // Log the display arrays after update
+                console.log('Before actions after update:', this.beforeActions.length);
+                console.log('=== BEFORE LIST ORDER ===');
+                this.beforeActions.forEach((action, index) => {
+                    console.log(`Before action ${index}: ${action.DeveloperName}, Order: ${action.Order__c}`);
+                });
+                console.log('=== END BEFORE LIST ORDER ===');
+                console.log('After actions after update:', this.afterActions.length);
+                this.afterActions.forEach((action, index) => {
+                    console.log(`After action ${index}: ${action.DeveloperName}, Order: ${action.Order__c}`);
+                });
                 
                 // Force a re-render by updating the main data array
                 this.triggerActions = [...this.triggerActions];
+                console.log('Main data array updated for reactivity');
                 
                 // Force component refresh to handle Proxy object issues
                 this.forceComponentRefresh();
+                console.log('Component refresh completed');
                 
-                console.log('Data refreshed successfully after deployment');
+                // Log the order again after component refresh
+                console.log('=== BEFORE LIST ORDER AFTER COMPONENT REFRESH ===');
+                this.beforeActions.forEach((action, index) => {
+                    console.log(`Before action ${index}: ${action.DeveloperName}, Order: ${action.Order__c}`);
+                });
+                console.log('=== END BEFORE LIST ORDER AFTER COMPONENT REFRESH ===');
+                
+                // Also log after a delay to see if the order changes
+                setTimeout(() => {
+                    console.log('=== BEFORE LIST ORDER AFTER DELAY ===');
+                    this.beforeActions.forEach((action, index) => {
+                        console.log(`Before action ${index}: ${action.DeveloperName}, Order: ${action.Order__c}`);
+                    });
+                    console.log('=== END BEFORE LIST ORDER AFTER DELAY ===');
+                }, 200);
+                
+                console.log('Data refreshed successfully after platform event');
                 
                 // Close modal and show success message
                 this.showToast('Success', 'Trigger Action updated successfully', 'success');
                 this.handleModalClose();
                 
             } catch (error) {
-                console.error('Error refreshing data after deployment:', error);
+                console.error('Error refreshing data after platform event:', error);
                 this.showToast('Warning', 'Data refresh failed. Please refresh the page manually.', 'warning');
             }
             
