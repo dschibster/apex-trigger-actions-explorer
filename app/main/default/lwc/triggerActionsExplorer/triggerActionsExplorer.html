@@ -1,0 +1,125 @@
+<template>
+    <!-- Builder Header Section -->
+    <div class="slds-builder-header_container">
+        <header class="slds-builder-header">
+            <div class="slds-builder-header__item">
+                <div class="slds-builder-header__item-label slds-media slds-media_center">
+                    <lightning-icon class="slds-media__figure slds-icon_container slds-icon-utility-topic" icon-name="utility:topic"></lightning-icon>
+                    <h1 class="slds-media__body">Trigger Actions Explorer</h1>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <!-- White Background Container -->
+    <div class="white-background-container">
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="slds-is-relative slds-p-around_large">
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error Display -->
+        <template if:true={error}>
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                <span class="slds-assistive-text">error</span>
+                <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
+                <h2>{error}</h2>
+            </div>
+        </template>
+
+        <!-- Main Content (only show when not loading and no errors) -->
+        <template if:false={isLoading}>
+            <template if:false={error}>
+                <!-- Centered Context Text with Dropdowns -->
+                <div class="slds-p-around_large slds-text-align_center slds-border_bottom">
+                    <div class="slds-text-heading_medium slds-text-color_weak">
+                        <lightning-combobox
+                            name="timing"
+                            value={selectedTiming}
+                            placeholder="Select timing..."
+                            options={timingOptionsList}
+                            onchange={handleTimingChange}
+                            variant="label-hidden"
+                            class="inline-dropdown">
+                        </lightning-combobox>
+                        {articleText} 
+                        <lightning-combobox
+                            name="triggerSetting"
+                            value={selectedSetting}
+                            placeholder="Select SObject..."
+                            options={triggerSettingsOptions}
+                            onchange={handleSettingChange}
+                            variant="label-hidden"
+                            class="inline-dropdown">
+                        </lightning-combobox>
+                        is 
+                        <lightning-combobox
+                            name="context"
+                            value={selectedContext}
+                            placeholder="Select action..."
+                            options={contextOptions}
+                            onchange={handleContextChange}
+                            variant="label-hidden"
+                            class="inline-dropdown">
+                        </lightning-combobox>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="slds-p-around_medium content-container">
+                    <template if:true={selectedSetting}>
+                        <template if:true={selectedContext}>
+                            <template if:true={selectedTiming}>
+                            <!-- Before Section -->
+                            <template if:true={shouldShowBeforeActions}>
+                                <template if:true={beforeActions.length}>
+                                    <div class="slds-m-bottom_large">
+                                                                            <c-trigger-actions-section 
+                                        title="Before Actions" 
+                                        actions={beforeActions} 
+                                        onview={handleViewAction}
+                                        onedit={handleEditAction} 
+                                        ondelete={handleDeleteAction}>
+                                    </c-trigger-actions-section>
+                                    </div>
+                                </template>
+                            </template>
+                            <!-- After Section -->
+                            <template if:true={shouldShowAfterActions}>
+                                <template if:true={afterActions.length}>
+                                    <div class="slds-m-bottom_large">
+                                        <c-trigger-actions-section 
+                                            title="After Actions" 
+                                            actions={afterActions} 
+                                            onview={handleViewAction}
+                                            onedit={handleEditAction} 
+                                            ondelete={handleDeleteAction}>
+                                        </c-trigger-actions-section>
+                                    </div>
+                                </template>
+                            </template>
+                            </template>
+                            <template if:false={selectedTiming}>
+                                <div class="slds-text-align_center slds-p-around_large">
+                                    <p class="slds-text-color_weak">Please select timing, trigger setting, and context to view actions</p>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={selectedContext}>
+                            <div class="slds-text-align_center slds-p-around_large">
+                                <p class="slds-text-color_weak">Please select both a trigger setting and context to view actions</p>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={selectedSetting}>
+                        <div class="slds-text-align_center slds-p-around_large">
+                            <p class="slds-text-color_weak">Please select a trigger setting to begin</p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

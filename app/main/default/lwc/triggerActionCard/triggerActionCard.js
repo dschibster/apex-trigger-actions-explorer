@@ -1,0 +1,68 @@
+import { LightningElement, api } from 'lwc';
+
+export default class TriggerActionCard extends LightningElement {
+    @api action;
+
+    connectedCallback() {
+        console.log('=== TriggerActionCard connected ===');
+        console.log('Action received:', this.action);
+        console.log(this.action.Bypass_Execution__c);
+        console.log('=== End connected ===');
+    }
+
+    get iconName() {
+        return this.action?.Flow_Name__c ? 'utility:flow' : 'utility:apex';
+    }
+
+    get displayName() {
+        if (this.action?.Flow_Name__c) {
+            return this.action.Flow_Name__c;
+        } else if (this.action?.Apex_Class_Name__c) {
+            return this.action.Apex_Class_Name__c;
+        }
+        return 'Unnamed Action';
+    }
+
+
+    get statusClass() {
+        return !this.action?.Bypass_Execution__c ? 'slds-theme_success' : 'slds-theme_warning';
+    }
+
+    get statusLabel() {
+        return !this.action?.Bypass_Execution__c ? 'Active' : 'Bypassed';
+    }
+
+    get actionType() {
+        return this.action?.Flow_Name__c ? 'Flow' : 'Apex';
+    }
+
+    get metadataUrl() {
+        // Create URL to the custom metadata record
+        const baseUrl = window.location.origin;
+        return `${baseUrl}/lightning/setup/CustomMetadata/page?address=%2F${this.action.Id}%3Fsetupid%3DCustomMetadata`;
+    }
+
+    handleMenuSelect(event) {
+        const selectedValue = event.detail.value;
+        
+        switch (selectedValue) {
+            case 'view':
+                this.dispatchEvent(new CustomEvent('view', {
+                    detail: { actionId: this.action.Id }
+                }));
+                break;
+            case 'edit':
+                this.dispatchEvent(new CustomEvent('edit', {
+                    detail: { actionId: this.action.Id }
+                }));
+                break;
+            case 'delete':
+                this.dispatchEvent(new CustomEvent('delete', {
+                    detail: { actionId: this.action.Id }
+                }));
+                break;
+        }
+    }
+}
+
+

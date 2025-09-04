@@ -1,0 +1,44 @@
+/* List item styling */
+.slds-list__item {
+    border-bottom: 1px solid #dddbda;
+}
+
+.slds-list__item:last-child {
+    border-bottom: none;
+}
+
+/* Grid alignment */
+.slds-grid_vertical-align-center {
+    align-items: center;
+}
+
+/* Text link styling */
+.slds-text-link {
+    color: #0176d3;
+    text-decoration: none;
+}
+
+.slds-text-link:hover {
+    text-decoration: underline;
+}
+
+/* Icon styling */
+.slds-icon-standard-flow {
+    --sds-c-icon-color-background: #0176d3;
+}
+
+/* Badge styling */
+.slds-theme_success {
+    background-color: #4bca81;
+    color: white;
+}
+
+.slds-theme_warning {
+    background-color: #fe9339;
+    color: white;
+}
+
+/* Menu button styling */
+.slds-dropdown-trigger {
+    position: relative;
+}

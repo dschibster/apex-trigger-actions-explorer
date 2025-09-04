@@ -1,0 +1,216 @@
+/* Trigger Actions Explorer Component Styles */
+
+/* Hide the flexiPageHeader - multiple approaches for Shadow DOM penetration */
+.flexiPageHeader,
+:host ::ng-deep .flexiPageHeader,
+:host ::ng-deep .flexiPageHeader *,
+:host ::ng-deep [class*="flexiPageHeader"],
+:host ::ng-deep [class*="flexiPageHeader"] *,
+:host ::ng-deep .slds-page-header,
+:host ::ng-deep .slds-page-header * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Alternative approach using global CSS */
+:global(.flexiPageHeader),
+:global(.flexiPageHeader *),
+:global([class*="flexiPageHeader"]),
+:global([class*="flexiPageHeader"] *) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Builder Header Styling */
+.slds-builder-header_container {
+    background: #032d60;
+    border-bottom: 1px solid #032d60;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0;
+}
+
+.slds-builder-header {
+    padding: 0.75rem 1rem;
+    min-height: auto;
+    position: relative;
+}
+
+.slds-builder-header__item {
+    display: flex;
+    align-items: center;
+}
+
+.slds-builder-header__item-label {
+    color: white;
+}
+
+.slds-builder-header h1 {
+    color: white !important;
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.slds-builder-header .slds-icon_container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    padding: 0.375rem;
+    margin-right: 0.75rem;
+}
+
+.slds-builder-header .slds-icon-utility-topic {
+    --slds-c-icon-color-foreground: white;
+}
+
+.slds-builder-header .slds-media__figure {
+    margin-right: 0.75rem;
+}
+
+/* White Background Container */
+.white-background-container {
+    background-color: white;
+    min-height: calc(100vh - 80px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+/* Content Container - Limit width and center */
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Inline Dropdown Styling */
+.inline-dropdown {
+    display: inline-block;
+    margin: 0 0.5rem;
+    min-width: 150px;
+}
+
+.inline-dropdown .slds-combobox__input {
+    border: 1px solid var(--lwc-colorBorder);
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.inline-dropdown .slds-combobox__input:focus {
+    border-color: var(--lwc-colorBrand);
+    box-shadow: 0 0 0 1px var(--lwc-colorBrand);
+}
+
+/* Context Text Styling */
+.context-text {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--lwc-colorTextWeak);
+}
+
+.context-text strong {
+    color: var(--lwc-colorTextDefault);
+    font-weight: 600;
+}
+
+/* Action Cards */
+.action-card {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--lwc-colorBorder);
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.action-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.2s ease;
+}
+
+.action-header {
+    cursor: pointer;
+    background-color: var(--lwc-colorBackground);
+    border-bottom: 1px solid var(--lwc-colorBorder);
+    padding: 1rem;
+}
+
+.action-header:hover {
+    background-color: var(--lwc-colorBackgroundRowHover);
+}
+
+.action-details {
+    padding: 0.75rem;
+    border-left: 3px solid var(--lwc-colorBorder);
+    margin-left: 1rem;
+}
+
+.action-meta {
+    color: var(--lwc-colorTextLabel);
+    font-size: 0.875rem;
+}
+
+.action-description {
+    color: var(--lwc-colorTextWeak);
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
+.action-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-active {
+    background-color: var(--lwc-colorSuccess);
+}
+
+.status-inactive {
+    background-color: var(--lwc-colorTextWeak);
+}
+
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: var(--lwc-colorTextWeak);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .slds-builder-header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .context-text {
+        font-size: 1.1rem;
+    }
+    
+    .inline-dropdown {
+        display: block;
+        margin: 0.5rem 0;
+        min-width: 100%;
+    }
+}

@@ -1,0 +1,37 @@
+<template>
+    <div class="slds-card slds-m-bottom_medium">
+        <div class="slds-card__header">
+            <div class="slds-grid slds-grid_align-spread">
+                <div class="slds-media slds-media_center">
+                    <lightning-icon icon-name="utility:chevronright" size="small" class="slds-m-right_small"></lightning-icon>
+                    <h3 class="slds-text-heading_medium">{title}</h3>
+                </div>
+                <div class="slds-no-flex">
+                    <slot name="actions"></slot>
+                </div>
+            </div>
+        </div>
+        <div class="slds-card__body slds-p-horizontal_none">
+            <template if:true={actions}>
+                <div class="slds-list slds-has-dividers_top">
+                    <template for:each={actions} for:item="act">
+                        <c-trigger-action-card 
+                            key={act.Id} 
+                            action={act}
+                            onview={handleView}
+                            onedit={handleEdit}
+                            ondelete={handleDelete}>
+                        </c-trigger-action-card>
+                    </template>
+                </div>
+            </template>
+            <template if:false={actions}>
+                <div class="slds-text-align_center slds-p-around_large">
+                    <p class="slds-text-color_weak">No actions</p>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>
+
+

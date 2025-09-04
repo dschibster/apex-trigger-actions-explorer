@@ -1,0 +1,12 @@
+{
+  "packageDirectories": [
+    {
+      "path": "app",
+      "default": true
+    }
+  ],
+  "name": "trigger-actions-explorer",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "64.0"
+}

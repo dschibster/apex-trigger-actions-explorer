@@ -1,0 +1,59 @@
+<template>
+    <div class="slds-list__item slds-border_bottom">
+        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-around_small">
+            <!-- Order Number -->
+            <div class="slds-col slds-size_1-of-12 slds-text-align_center">
+                <span class="slds-text-heading_small slds-text-color_weak">{action.Order__c}</span>
+            </div>
+            
+            <!-- Icon -->
+            <div class="slds-col slds-size_1-of-12 slds-text-align_center">
+                <lightning-icon 
+                    icon-name={iconName} 
+                    size="small" 
+                    class="slds-icon-standard-flow">
+                </lightning-icon>
+            </div>
+            
+            <!-- Title and Description -->
+            <div class="slds-col slds-size_7-of-12">
+                <div class="slds-grid slds-grid_vertical">
+                    <div class="slds-grid slds-grid_wrap slds-grid_align-spread">
+                        <div class="slds-grid slds-grid_wrap">
+                            <a href={metadataUrl} target="_blank" class="slds-text-link">
+                                {displayName}
+                            </a>
+                            <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
+                            <span class="slds-text-color_weak slds-text-body_small">{actionType}</span>
+                        </div>
+                    </div>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">{action.Description__c}</p>
+                </div>
+            </div>
+            
+            <!-- Status Badge -->
+            <div class="slds-col slds-size_2-of-12 slds-text-align_center">
+                <lightning-badge 
+                    label={statusLabel} 
+                    class={statusClass}>
+                </lightning-badge>
+            </div>
+            
+            <!-- Chevron Dropdown -->
+            <div class="slds-col slds-size_1-of-12 slds-text-align_center">
+                <lightning-button-menu 
+                    variant="border-filled" 
+                    icon-name="utility:down"
+                    size="small"
+                    onselect={handleMenuSelect}
+                    class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                    <lightning-menu-item value="view" label="View Details"></lightning-menu-item>
+                    <lightning-menu-item value="edit" label="Edit"></lightning-menu-item>
+                    <lightning-menu-item value="delete" label="Delete"></lightning-menu-item>
+                </lightning-button-menu>
+            </div>
+        </div>
+    </div>
+</template>
+
+
