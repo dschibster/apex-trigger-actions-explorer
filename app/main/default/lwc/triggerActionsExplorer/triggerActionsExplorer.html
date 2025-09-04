@@ -122,4 +122,14 @@
             </template>
         </template>
     </div>
+    
+    <!-- Trigger Action Modal -->
+    <c-trigger-action-modal 
+        is-open={isModalOpen}
+        action={selectedAction}
+        mode={modalMode}
+        onclose={handleModalClose}
+        onmodechange={handleModalModeChange}
+        onupdate={handleModalUpdate}>
+    </c-trigger-action-modal>
 </template>

@@ -12,6 +12,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track isLoading = false;
     @track error = null;
     
+    // Modal properties
+    @track isModalOpen = false;
+    @track selectedAction = {};
+    @track modalMode = 'view';
+    
     // Reactive properties for display - these will be populated with Apex data
     @track beforeActions = [];
     @track afterActions = [];
@@ -52,8 +57,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.isLoading = true;
             this.error = null;
             
-            console.log('Loading data from Apex...');
-            
             // Fetch data using async/await
             const [settings, actions] = await Promise.all([
                 getTriggerSettings(),
@@ -62,11 +65,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             
             this.triggerSettings = settings || [];
             this.triggerActions = actions || [];
-            
-            console.log('Data loaded successfully:', {
-                triggerSettings: this.triggerSettings.length,
-                triggerActions: this.triggerActions.length
-            });
             
             // Set default selection if data is available
             if (this.triggerSettings.length > 0) {
@@ -87,50 +85,22 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     }
 
     async handleSettingChange(event) {
-        console.log('=== Setting Change Handler START ===');
-        console.log('Event received:', event);
-        console.log('Event detail:', event.detail);
-        
         this.selectedSetting = event.detail.value;
-        console.log('Selected setting updated to:', this.selectedSetting);
-        
-        // Update display actions based on new selection
         this.updateDisplayActions();
-        
-        console.log('=== Setting Change Handler END ===');
     }
 
     async handleContextChange(event) {
-        console.log('=== Context Change ===');
-        console.log('Event detail:', event.detail);
         this.selectedContext = event.detail.value;
-        console.log('Selected context updated to:', this.selectedContext);
-        
-        // Update display actions based on new selection
         this.updateDisplayActions();
     }
 
     async handleTimingChange(event) {
-        console.log('=== Timing Change ===');
-        console.log('Event detail:', event.detail);
         this.selectedTiming = event.detail.value;
-        console.log('Selected timing updated to:', this.selectedTiming);
-        
-        // Update display actions based on new selection
         this.updateDisplayActions();
     }
 
     updateDisplayActions() {
-        console.log('=== updateDisplayActions called ===');
-        console.log('Current state:', {
-            selectedSetting: this.selectedSetting,
-            selectedContext: this.selectedContext,
-            triggerSettingsCount: this.triggerSettings.length,
-            triggerActionsCount: this.triggerActions.length
-        });
-        
         if (!this.selectedSetting || !this.selectedContext || !this.selectedTiming) {
-            console.log('No selection, clearing actions');
             this.beforeActions = [];
             this.afterActions = [];
             return;
@@ -138,62 +108,24 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         
         const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
         if (!setting) {
-            console.log('Setting not found, clearing actions');
             this.beforeActions = [];
             this.afterActions = [];
             return;
         }
         
-        console.log('Processing actions for setting:', {
-            id: setting.Id,
-            developerName: setting.DeveloperName,
-            objectApiName: setting.Object_API_Name__c
-        });
-        
         // Get context fields to check based on the selected DML context
         const contextFields = this.getContextFields(this.selectedContext);
-        console.log('Context fields for', this.selectedContext, ':', contextFields);
-        
-        // Debug: Check what actions exist and their context field values
-        console.log('All trigger actions:', this.triggerActions.map(a => ({
-            id: a.Id,
-            name: a.DeveloperName,
-            beforeInsert: a.Before_Insert__c,
-            afterInsert: a.After_Insert__c,
-            beforeUpdate: a.Before_Update__c,
-            afterUpdate: a.After_Update__c,
-            beforeDelete: a.Before_Delete__c,
-            afterDelete: a.After_Delete__c,
-            afterUndelete: a.After_Undelete__c
-        })));
         
         // Filter actions that have the selected setting in any of the context fields
         const filteredActions = this.triggerActions.filter(action => 
             contextFields.some(field => action[field] === setting.Id)
         );
         
-        console.log('Filtered actions count:', filteredActions.length);
-        console.log('Sample filtered action:', filteredActions[0]);
-        
         // Separate actions into before and after based on context
         this.beforeActions = [];
         this.afterActions = [];
         
         filteredActions.forEach(action => {
-            console.log('Processing action:', {
-                id: action.Id,
-                developerName: action.DeveloperName,
-                description: action.Description__c,
-                order: action.Order__c,
-                beforeInsert: action.Before_Insert__c,
-                afterInsert: action.After_Insert__c,
-                beforeUpdate: action.Before_Update__c,
-                afterUpdate: action.After_Update__c,
-                beforeDelete: action.Before_Delete__c,
-                afterDelete: action.After_Delete__c,
-                afterUndelete: action.After_Undelete__c
-            });
-            
             // Check if action is configured for before context
             if (this.shouldShowBeforeActions() && 
                 this.isBeforeContext(this.selectedContext) && 
@@ -215,7 +147,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                     Required_Permission__c: action.Required_Permission__c || null
                 };
                 
-                console.log('Adding to beforeActions:', actionObj);
                 this.beforeActions.push(actionObj);
             }
             
@@ -241,7 +172,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                     Required_Permission__c: action.Required_Permission__c || null
                 };
                 
-                console.log('Adding to afterActions:', actionObj);
                 this.afterActions.push(actionObj);
             }
         });
@@ -249,13 +179,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         // Sort actions by order
         this.beforeActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
         this.afterActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
-        
-        console.log('Final display actions:', {
-            beforeActions: this.beforeActions,
-            afterActions: this.afterActions,
-            beforeCount: this.beforeActions.length,
-            afterCount: this.afterActions.length
-        });
     }
 
     isBeforeContext(context) {
@@ -337,20 +260,53 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
 
     handleViewAction(event) {
         const actionId = event.detail.actionId;
-        // TODO: Implement action viewing
-        console.log('View action:', actionId);
+        const action = this.findActionById(actionId);
+        if (action) {
+            this.selectedAction = action;
+            this.modalMode = 'view';
+            this.isModalOpen = true;
+        }
     }
 
     handleEditAction(event) {
         const actionId = event.detail.actionId;
-        // TODO: Implement action editing
-        console.log('Edit action:', actionId);
+        const action = this.findActionById(actionId);
+        if (action) {
+            this.selectedAction = action;
+            this.modalMode = 'edit';
+            this.isModalOpen = true;
+        }
     }
 
     handleDeleteAction(event) {
         const actionId = event.detail.actionId;
         // TODO: Implement action deletion
         console.log('Delete action:', actionId);
+    }
+
+    findActionById(actionId) {
+        // Search in both before and after actions
+        const allActions = [...this.beforeActions, ...this.afterActions];
+        return allActions.find(action => action.Id === actionId);
+    }
+
+    handleModalClose() {
+        this.isModalOpen = false;
+        this.selectedAction = {};
+        this.modalMode = 'view';
+    }
+
+    handleModalModeChange(event) {
+        this.modalMode = event.detail.mode;
+    }
+
+    handleModalUpdate(event) {
+        const { actionId, actionData } = event.detail;
+        // TODO: Implement action update via Apex
+        console.log('Update action:', actionId, actionData);
+        
+        // For now, just close the modal
+        this.handleModalClose();
     }
 
     get hasBeforeActions() {
