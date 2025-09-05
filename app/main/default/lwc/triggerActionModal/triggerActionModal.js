@@ -290,16 +290,7 @@ export default class TriggerActionModal extends LightningElement {
         // Reset action type to default
         this.selectedActionType = 'flow';
         
-        if (this.mode === 'create') {
-            // For creation mode, cancel should close the modal entirely
-            this.mode = 'view';
-            this.dispatchEvent(new CustomEvent('close'));
-        } else {
-            // For edit mode, cancel should return to view mode
-            this.mode = 'view';
-            this.dispatchEvent(new CustomEvent('modechange', {
-                detail: { mode: 'view' }
-            }));
-        }
+        // For both create and edit modes, cancel should close the modal entirely
+        this.dispatchEvent(new CustomEvent('close'));
     }
 }

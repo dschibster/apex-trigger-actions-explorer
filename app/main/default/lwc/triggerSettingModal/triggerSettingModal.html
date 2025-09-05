@@ -1,0 +1,162 @@
+<template>
+    <template if:true={isOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon 
+                        icon-name="utility:close" 
+                        onclick={handleClose} 
+                        alternative-text="close" 
+                        variant="bare-inverse" 
+                        class="slds-modal__close">
+                    </lightning-button-icon>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                        {modalTitle}
+                    </h2>
+                </header>
+                
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <!-- Error Display -->
+                    <template if:true={modalError}>
+                        <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error slds-m-bottom_medium" role="alert">
+                            <span class="slds-assistive-text">error</span>
+                            <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
+                            <h2>{modalError}</h2>
+                        </div>
+                    </template>
+                    
+                    <!-- Loading Spinner for Update Operation -->
+                    <template if:true={isUpdating}>
+                        <div class="slds-is-relative slds-p-around_medium">
+                            <lightning-spinner alternative-text="Deploying..." size="small"></lightning-spinner>
+                            <p class="slds-text-align_center slds-m-top_small">Deploying SObject Trigger Setting...</p>
+                            <p class="slds-text-align_center slds-text-color_weak slds-m-top_x-small">This may take a few seconds</p>
+                        </div>
+                    </template>
+                    
+                    <!-- Form Content (hidden during update) -->
+                    <template if:false={isUpdating}>
+                    <lightning-layout multiple-rows="true">
+                        <!-- Row 1: Developer Name and Label (for creation mode) -->
+                        <template if:true={isCreateMode}>
+                            <lightning-layout-item size="6" padding="around-small">
+                                <lightning-input 
+                                    label="Developer Name" 
+                                    value={settingData.DeveloperName}
+                                    onchange={handleFieldChange}
+                                    data-field="DeveloperName"
+                                    required>
+                                </lightning-input>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="6" padding="around-small">
+                                <lightning-input 
+                                    label="Label" 
+                                    value={settingData.Label}
+                                    onchange={handleFieldChange}
+                                    data-field="Label"
+                                    required>
+                                </lightning-input>
+                            </lightning-layout-item>
+                        </template>
+                        
+                        <!-- Row 2: Object API Name (full width) -->
+                        <lightning-layout-item size="12" padding="around-small">
+                            <lightning-input 
+                                label="Object API Name" 
+                                value={settingData.Object_API_Name__c}
+                                onchange={handleFieldChange}
+                                data-field="Object_API_Name__c"
+                                disabled={isReadOnly}
+                                required={isObjectApiNameRequired}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                        
+                        <!-- Row 3: Object Namespace and TriggerRecord Class Name -->
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input 
+                                label="Object Namespace" 
+                                value={settingData.Object_Namespace__c}
+                                onchange={handleFieldChange}
+                                data-field="Object_Namespace__c"
+                                disabled={isReadOnly}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input 
+                                label="TriggerRecord Class Name" 
+                                value={settingData.TriggerRecord_Class_Name__c}
+                                onchange={handleFieldChange}
+                                data-field="TriggerRecord_Class_Name__c"
+                                disabled={isReadOnly}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                        
+                        <!-- Row 4: Required Permission and Bypass Permission -->
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input 
+                                label="Required Permission" 
+                                value={settingData.Required_Permission__c}
+                                onchange={handleFieldChange}
+                                data-field="Required_Permission__c"
+                                disabled={isReadOnly}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input 
+                                label="Bypass Permission" 
+                                value={settingData.Bypass_Permission__c}
+                                onchange={handleFieldChange}
+                                data-field="Bypass_Permission__c"
+                                disabled={isReadOnly}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                        
+                        <!-- Row 5: Bypass Execution (full width) -->
+                        <lightning-layout-item size="12" padding="around-small">
+                            <lightning-input 
+                                type="checkbox"
+                                label="Bypass Execution" 
+                                checked={settingData.Bypass_Execution__c}
+                                onchange={handleFieldChange}
+                                data-field="Bypass_Execution__c"
+                                disabled={isReadOnly}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                    </template>
+                </div>
+                
+                <footer class="slds-modal__footer">
+                    <template if:true={isReadOnly}>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Close" 
+                            onclick={handleClose}>
+                        </lightning-button>
+                        <lightning-button 
+                            variant="brand" 
+                            label="Edit" 
+                            onclick={handleEdit}
+                            class="slds-m-left_small">
+                        </lightning-button>
+                    </template>
+                    <template if:false={isReadOnly}>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Cancel" 
+                            onclick={handleCancel}>
+                        </lightning-button>
+                        <lightning-button 
+                            variant="brand" 
+                            label={buttonLabel}
+                            onclick={handleUpdate}
+                            disabled={isUpdating}
+                            class="slds-m-left_small">
+                        </lightning-button>
+                    </template>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

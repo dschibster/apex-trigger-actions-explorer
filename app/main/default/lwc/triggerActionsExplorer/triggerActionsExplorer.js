@@ -24,6 +24,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track modalMode = 'view';
     @track sectionContext = ''; // 'before' or 'after'
     
+    // Trigger Setting Modal properties
+    @track isSettingModalOpen = false;
+    @track selectedSettingData = {};
+    @track settingModalMode = 'view';
+    
     
     // Reactive properties for display - these will be populated with Apex data
     @track beforeActions = [];
@@ -76,10 +81,12 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.isLoading = true;
             this.error = null;
             
-            // Fetch data using async/await
+            // Fetch data using async/await with timestamp to force fresh data
+            const timestamp = Date.now().toString();
+            console.log('Loading data with timestamp:', timestamp);
             const [settings, actions] = await Promise.all([
-                getTriggerSettings(),
-                getTriggerActions()
+                getTriggerSettings({ timestamp: timestamp }),
+                getTriggerActions({ timestamp: timestamp })
             ]);
             
             this.triggerSettings = settings || [];
@@ -135,6 +142,26 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     async handleRefresh() {
         console.log('Refresh button clicked - reloading data');
         await this.loadData();
+    }
+
+    handleEditSetting() {
+        if (this.selectedSetting) {
+            // Find the current setting data
+            const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+            if (setting) {
+                this.selectedSettingData = setting;
+                this.settingModalMode = 'edit';
+                this.isSettingModalOpen = true;
+                console.log('Edit setting requested:', setting);
+            }
+        }
+    }
+
+    handleAddSetting() {
+        this.selectedSettingData = {};
+        this.settingModalMode = 'create';
+        this.isSettingModalOpen = true;
+        console.log('Add new setting requested');
     }
 
     updateDisplayActions() {
@@ -292,6 +319,26 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         return setting ? setting.Object_API_Name__c : '';
     }
 
+    get selectedSettingBadgeLabel() {
+        if (!this.selectedSetting) return '';
+        const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+        if (!setting) return '';
+        
+        // Bypass_Execution__c = true means the trigger is BYPASSED
+        // Bypass_Execution__c = false means the trigger is ACTIVE
+        return setting.Bypass_Execution__c ? 'Bypassed' : 'Active';
+    }
+
+    get selectedSettingBadgeVariant() {
+        if (!this.selectedSetting) return 'inverse';
+        const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+        if (!setting) return 'inverse';
+        
+        // Bypass_Execution__c = true means the trigger is BYPASSED (error variant)
+        // Bypass_Execution__c = false means the trigger is ACTIVE (success variant)
+        return setting.Bypass_Execution__c ? 'error' : 'success';
+    }
+
     get selectedContextLabel() {
         const context = this.contextOptions.find(c => c.value === this.selectedContext);
         return context ? context.label : '';
@@ -435,12 +482,76 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         }
     }
 
+    // Trigger Setting Modal handlers
+    handleSettingModalClose() {
+        this.isSettingModalOpen = false;
+        this.selectedSettingData = {};
+        this.settingModalMode = 'view';
+        this.isUpdating = false; // Reset updating state
+    }
+
+    handleSettingModalModeChange(event) {
+        this.settingModalMode = event.detail.mode;
+    }
+
+    async handleSettingModalUpdate(event) {
+        const { settingId, settingData, mode, jobId } = event.detail;
+        
+        try {
+            this.isUpdating = true;
+            
+            if (mode === 'create') {
+                console.log('Creating new setting:', settingData);
+            } else {
+                console.log('Updating setting:', settingId, settingData);
+            }
+            
+            console.log('Setting deployment initiated, job ID:', jobId);
+            
+            // Keep modal open and show loading spinner during deployment
+            console.log('Deployment initiated, keeping modal open with loading spinner');
+            console.log('Waiting for platform event callback...');
+            
+            // The modal will stay open with loading spinner until the platform event callback
+            // handles the deployment completion and refreshes the data
+            
+        } catch (error) {
+            console.error('Error processing trigger setting:', error);
+            const errorMessage = error.body?.message || error.message || 'Failed to process trigger setting';
+            
+            // Check if this is a pre-deployment error that might still trigger a platform event
+            // In that case, we should wait for the platform event instead of showing the error immediately
+            if (errorMessage.includes('Error upserting trigger setting')) {
+                console.log('Pre-deployment error detected, waiting for platform event callback...');
+                // Keep the loading state and wait for platform event
+                // The platform event will handle showing the error message
+                
+                // Set a timeout to show the error if platform event doesn't arrive within 10 seconds
+                setTimeout(() => {
+                    if (this.isUpdating) {
+                        console.log('Platform event timeout, showing original error message');
+                        this.showToast('Error', errorMessage, 'error');
+                        this.isUpdating = false;
+                    }
+                }, 10000);
+            } else {
+                // For other types of errors (network, etc.), show immediately
+                this.showToast('Error', errorMessage, 'error');
+                this.isUpdating = false;
+            }
+        }
+    }
+
     get hasBeforeActions() {
         return this.beforeActions && this.beforeActions.length > 0;
     }
 
     get hasAfterActions() {
         return this.afterActions && this.afterActions.length > 0;
+    }
+
+    get isEditSettingDisabled() {
+        return this.isLoading || !this.selectedSetting;
     }
 
     get testData() {
@@ -645,18 +756,24 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             
             try {
                 // Store original data for comparison
-                const originalData = JSON.stringify(this.triggerActions);
-                console.log('Original data before platform event refresh:', originalData);
+                const originalActionData = JSON.stringify(this.triggerActions);
+                const originalSettingData = JSON.stringify(this.triggerSettings);
+                console.log('Original action data before platform event refresh:', originalActionData);
+                console.log('Original setting data before platform event refresh:', originalSettingData);
                 
                 // Use fresh query (bypasses caching) without additional delays
                 console.log('Loading fresh data after platform event...');
                 await this.loadData();
                 
                 // Check if data actually changed
-                const newData = JSON.stringify(this.triggerActions);
-                console.log('New data after platform event refresh:', newData);
-                const dataChanged = originalData !== newData;
-                console.log('Data changed:', dataChanged);
+                const newActionData = JSON.stringify(this.triggerActions);
+                const newSettingData = JSON.stringify(this.triggerSettings);
+                console.log('New action data after platform event refresh:', newActionData);
+                console.log('New setting data after platform event refresh:', newSettingData);
+                const actionDataChanged = originalActionData !== newActionData;
+                const settingDataChanged = originalSettingData !== newSettingData;
+                console.log('Action data changed:', actionDataChanged);
+                console.log('Setting data changed:', settingDataChanged);
                 
                 // Log specific order values to see what's happening
                 console.log('Order values in loaded data:');
@@ -717,9 +834,17 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 
                 console.log('Data refreshed successfully after platform event');
                 
-                // Close modal and show success message
-                this.showToast('Success', message || 'Trigger Action updated successfully', 'success');
+                // Close modals and show success message
+                const successMessage = message || 'Deployment completed successfully';
+                if (settingDataChanged) {
+                    console.log('Setting data was updated, showing success message');
+                }
+                if (actionDataChanged) {
+                    console.log('Action data was updated, showing success message');
+                }
+                this.showToast('Success', successMessage, 'success');
                 this.handleModalClose();
+                this.handleSettingModalClose();
                 
             } catch (error) {
                 console.error('Error refreshing data after platform event:', error);
