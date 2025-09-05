@@ -30,6 +30,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track settingModalMode = 'view';
     
     
+    
     // Reactive properties for display - these will be populated with Apex data
     @track beforeActions = [];
     @track afterActions = [];
@@ -104,7 +105,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 this.selectedSetting = this.triggerSettings[0].Id;
                 this.selectedSettingDeveloperName = this.triggerSettings[0].DeveloperName;
                 this.selectedContext = this.contextOptions[0].value;
-                this.selectedTiming = this.timingOptions[2].value; // Default to "Before and After"
+                this.selectedTiming = this.timingOptions[0].value; // Default to "Before" to test hiding
             }
             
             // Always update display actions after loading data
@@ -135,9 +136,12 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     }
 
     async handleTimingChange(event) {
+        console.log('Timing changed from', this.selectedTiming, 'to', event.detail.value);
         this.selectedTiming = event.detail.value;
+        console.log('After setting, selectedTiming is:', this.selectedTiming);
         this.updateDisplayActions();
     }
+
 
     async handleRefresh() {
         console.log('Refresh button clicked - reloading data');
@@ -206,7 +210,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         
         filteredActions.forEach(action => {
             // Check if action is configured for before context
-            if (this.shouldShowBeforeActions() && 
+            if (this.shouldShowBeforeActions && 
                 this.isBeforeContext(this.selectedContext) && 
                 (action.Before_Insert__c === setting.Id || 
                  action.Before_Update__c === setting.Id || 
@@ -230,7 +234,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             }
             
             // Check if action is configured for after context
-            if (this.shouldShowAfterActions() && 
+            if (this.shouldShowAfterActions && 
                 this.isAfterContext(this.selectedContext) && 
                 (action.After_Insert__c === setting.Id || 
                  action.After_Update__c === setting.Id || 
@@ -285,12 +289,16 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         return ['CREATED', 'UPDATED', 'DELETED', 'RESTORED'].includes(context);
     }
 
-    shouldShowBeforeActions() {
-        return this.selectedTiming === 'BEFORE' || this.selectedTiming === 'BOTH';
+    get shouldShowBeforeActions() {
+        const shouldShow = this.selectedTiming === 'BEFORE' || this.selectedTiming === 'BOTH';
+        console.log('shouldShowBeforeActions getter:', shouldShow, 'selectedTiming:', this.selectedTiming, 'type:', typeof this.selectedTiming);
+        return shouldShow;
     }
 
-    shouldShowAfterActions() {
-        return this.selectedTiming === 'AFTER' || this.selectedTiming === 'BOTH';
+    get shouldShowAfterActions() {
+        const shouldShow = this.selectedTiming === 'AFTER' || this.selectedTiming === 'BOTH';
+        console.log('shouldShowAfterActions getter:', shouldShow, 'selectedTiming:', this.selectedTiming, 'type:', typeof this.selectedTiming);
+        return shouldShow;
     }
 
     getContextFields(context) {
@@ -342,6 +350,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     get selectedContextLabel() {
         const context = this.contextOptions.find(c => c.value === this.selectedContext);
         return context ? context.label : '';
+    }
+
+    get selectedTimingLabel() {
+        const timing = this.timingOptions.find(t => t.value === this.selectedTiming);
+        return timing ? timing.label : 'Select timing...';
     }
 
     get triggerSettingsOptions() {

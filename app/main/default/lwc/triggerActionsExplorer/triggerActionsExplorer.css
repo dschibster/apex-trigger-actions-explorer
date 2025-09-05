@@ -200,3 +200,147 @@
         min-width: 100%;
     }
 }
+
+/* Clickable text styling */
+.clickable-text {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    color: inherit;
+    transition: color 0.2s ease;
+}
+
+.clickable-text:hover {
+    color: #0176d3;
+    text-decoration-color: #0176d3;
+}
+
+.clickable-text:focus {
+    outline: 2px solid #0176d3;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Make comboboxes look like text when open */
+.inline-dropdown-text {
+    display: inline-block !important;
+    width: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+    line-height: inherit !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    position: relative !important;
+}
+
+.inline-dropdown-text .slds-combobox {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+    display: inline-block !important;
+    width: auto !important;
+    min-width: auto !important;
+}
+
+.inline-dropdown-text .slds-combobox__form-element {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+}
+
+.inline-dropdown-text .slds-combobox__input-entity-icon {
+    display: none !important;
+}
+
+.inline-dropdown-text .slds-combobox__input-entity-icon-container {
+    display: none !important;
+}
+
+.inline-dropdown-text .slds-combobox__input {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+    line-height: inherit !important;
+    text-decoration: underline !important;
+    text-decoration-style: dotted !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+.inline-dropdown-text .slds-combobox__input:focus {
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    text-decoration: underline !important;
+    text-decoration-style: solid !important;
+    text-decoration-color: #0176d3 !important;
+    color: #0176d3 !important;
+}
+
+.inline-dropdown-text .slds-combobox__input:hover {
+    color: #0176d3 !important;
+    text-decoration-color: #0176d3 !important;
+}
+
+/* Hide dropdown arrow and other combobox elements */
+.inline-dropdown-text .slds-combobox__input-entity-icon,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon_container,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon_container .slds-icon,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon_container .slds-icon svg,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon_container .slds-icon use,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon_container .slds-icon use svg,
+.inline-dropdown-text .slds-combobox__input-entity-icon-container .slds-icon_container .slds-icon use path {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hide any remaining combobox styling */
+.inline-dropdown-text .slds-combobox__input-entity-icon-container {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+/* Ensure the input field itself looks like text */
+.inline-dropdown-text .slds-combobox__input {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: none !important;
+    background-position: none !important;
+    background-repeat: none !important;
+    background-size: none !important;
+}
