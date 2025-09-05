@@ -37,7 +37,29 @@
                     <!-- Form Content (hidden during update) -->
                     <template if:false={isUpdating}>
                     <lightning-layout multiple-rows="true">
-                        <!-- Row 1: Description (full width) -->
+                        <!-- Row 1: Developer Name and Label (for creation mode) -->
+                        <template if:true={isCreateMode}>
+                            <lightning-layout-item size="6" padding="around-small">
+                                <lightning-input 
+                                    label="Developer Name" 
+                                    value={actionData.DeveloperName}
+                                    onchange={handleFieldChange}
+                                    data-field="DeveloperName"
+                                    required>
+                                </lightning-input>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="6" padding="around-small">
+                                <lightning-input 
+                                    label="Label" 
+                                    value={actionData.Label}
+                                    onchange={handleFieldChange}
+                                    data-field="Label"
+                                    required>
+                                </lightning-input>
+                            </lightning-layout-item>
+                        </template>
+                        
+                        <!-- Row 2: Description (full width) -->
                         <lightning-layout-item size="12" padding="around-small">
                             <lightning-input 
                                 label="Description" 
@@ -168,7 +190,7 @@
                         </lightning-button>
                         <lightning-button 
                             variant="brand" 
-                            label="Update" 
+                            label={buttonLabel}
                             onclick={handleUpdate}
                             disabled={isUpdating}
                             class="slds-m-left_small">

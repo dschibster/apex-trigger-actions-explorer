@@ -103,42 +103,38 @@ public with sharing class TriggerActionsExplorerController {
             
         } catch (Exception e) {
             System.debug('Error upserting trigger action: ' + e.getMessage());
+            System.debug('Exception type: ' + e.getTypeName());
+            System.debug('Exception stack trace: ' + e.getStackTraceString());
+            
+            // For validation errors or other pre-deployment issues, we should still try to publish a platform event
+            // to provide consistent error handling to the frontend
+            try {
+                String currentUserId = UserInfo.getUserId();
+                TriggerActionsExplorerCallback__e callbackEvent = new TriggerActionsExplorerCallback__e();
+                callbackEvent.UserId__c = currentUserId;
+                callbackEvent.Status__c = 'failed';
+                
+                String errorMessage = 'Error upserting trigger action: ' + e.getMessage();
+                if (errorMessage.length() > 255) {
+                    errorMessage = errorMessage.substring(0, 252) + '...';
+                }
+                callbackEvent.Message__c = errorMessage;
+                System.debug('Publishing pre-deployment error platform event with message: ' + errorMessage);
+                
+                Database.SaveResult publishResult = EventBus.publish(callbackEvent);
+                if (publishResult.isSuccess()) {
+                    System.debug('Platform event published for pre-deployment error');
+                } else {
+                    System.debug('Failed to publish platform event for pre-deployment error: ' + publishResult.getErrors());
+                }
+            } catch (Exception publishException) {
+                System.debug('Error publishing platform event for pre-deployment error: ' + publishException.getMessage());
+            }
+            
             throw new AuraHandledException('Error upserting trigger action: ' + e.getMessage());
         }
     }
     
-    /**
-     * Deletes a Trigger Action custom metadata record using the Metadata API
-     * @param developerName The DeveloperName of the custom metadata record to delete
-     * @return String containing the deployment job ID
-     */
-    @AuraEnabled
-    public static String deleteTriggerAction(String developerName) {
-        try {
-            if (String.isBlank(developerName)) {
-                throw new AuraHandledException('DeveloperName is required to delete a trigger action');
-            }
-            
-            // Create a delete operation for the custom metadata record
-            Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
-            customMetadata.fullName = 'Trigger_Action__mdt.' + developerName;
-            
-            // Deploy the deletion
-            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
-            mdContainer.addMetadata(customMetadata);
-            
-            // Create callback and deploy
-            Metadata.DeployCallback callback = new TriggerActionDeployCallback();
-            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
-            
-            System.debug('Trigger Action delete deployment job ID: ' + jobId);
-            return String.valueOf(jobId);
-            
-        } catch (Exception e) {
-            System.debug('Error deleting trigger action: ' + e.getMessage());
-            throw new AuraHandledException('Error deleting trigger action: ' + e.getMessage());
-        }
-    }
     
     /**
      * Helper method to add string field values to custom metadata

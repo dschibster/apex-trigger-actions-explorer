@@ -56,11 +56,6 @@ export default class TriggerActionCard extends LightningElement {
                     detail: { actionId: this.action.Id }
                 }));
                 break;
-            case 'delete':
-                this.dispatchEvent(new CustomEvent('delete', {
-                    detail: { actionId: this.action.Id }
-                }));
-                break;
         }
     }
 }

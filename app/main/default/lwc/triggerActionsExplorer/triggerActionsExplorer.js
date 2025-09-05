@@ -13,6 +13,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track selectedSetting = '';
     @track selectedContext = '';
     @track selectedTiming = '';
+    @track selectedSettingDeveloperName = '';
     @track isLoading = false;
     @track isUpdating = false;
     @track error = null;
@@ -21,6 +22,8 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track isModalOpen = false;
     @track selectedAction = {};
     @track modalMode = 'view';
+    @track sectionContext = ''; // 'before' or 'after'
+    
     
     // Reactive properties for display - these will be populated with Apex data
     @track beforeActions = [];
@@ -92,6 +95,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             // Set default selection if data is available
             if (this.triggerSettings.length > 0) {
                 this.selectedSetting = this.triggerSettings[0].Id;
+                this.selectedSettingDeveloperName = this.triggerSettings[0].DeveloperName;
                 this.selectedContext = this.contextOptions[0].value;
                 this.selectedTiming = this.timingOptions[2].value; // Default to "Before and After"
             }
@@ -110,6 +114,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
 
     async handleSettingChange(event) {
         this.selectedSetting = event.detail.value;
+        
+        // Update the DeveloperName as well
+        const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+        this.selectedSettingDeveloperName = setting ? setting.DeveloperName : '';
+        
         this.updateDisplayActions();
     }
 
@@ -121,6 +130,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     async handleTimingChange(event) {
         this.selectedTiming = event.detail.value;
         this.updateDisplayActions();
+    }
+
+    async handleRefresh() {
+        console.log('Refresh button clicked - reloading data');
+        await this.loadData();
     }
 
     updateDisplayActions() {
@@ -152,6 +166,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         console.log('Context fields:', contextFields);
         
         // Filter actions that have the selected setting in any of the context fields
+        // Note: The trigger action fields contain Id references to the trigger settings
         const filteredActions = this.triggerActions.filter(action => 
             contextFields.some(field => action[field] === setting.Id)
         );
@@ -332,10 +347,23 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         }
     }
 
-    handleDeleteAction(event) {
-        const actionId = event.detail.actionId;
-        // TODO: Implement action deletion
-        console.log('Delete action:', actionId);
+
+    handleAddAction(event) {
+        const sectionTitle = event.detail.sectionTitle;
+        
+        // Determine section context based on title
+        if (sectionTitle === 'Before Actions') {
+            this.sectionContext = 'before';
+        } else if (sectionTitle === 'After Actions') {
+            this.sectionContext = 'after';
+        }
+        
+        // Clear selected action and set mode to create
+        this.selectedAction = {};
+        this.modalMode = 'create';
+        this.isModalOpen = true;
+        
+        console.log('Add action clicked for section:', sectionTitle, 'Context:', this.sectionContext);
     }
 
     findActionById(actionId) {
@@ -356,18 +384,22 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     }
 
     async handleModalUpdate(event) {
-        const { actionId, actionData } = event.detail;
+        const { actionId, actionData, mode } = event.detail;
         
         try {
             this.isUpdating = true;
             // Don't clear the main error here - keep it separate from modal errors
             
-            console.log('Updating action:', actionId, actionData);
+            if (mode === 'create') {
+                console.log('Creating new action:', actionData);
+            } else {
+                console.log('Updating action:', actionId, actionData);
+            }
             
             // Call the upsert method with the action data
             const jobId = await upsertTriggerAction({ actionData: JSON.stringify(actionData) });
             
-            console.log('Update initiated, deployment job ID:', jobId);
+            console.log('Deployment initiated, job ID:', jobId);
             
             // Keep modal open and show loading spinner during deployment
             console.log('Deployment initiated, keeping modal open with loading spinner');
@@ -377,14 +409,29 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             // handles the deployment completion and refreshes the data
             
         } catch (error) {
-            console.error('Error updating trigger action:', error);
-            const errorMessage = error.body?.message || error.message || 'Failed to update trigger action';
-            this.showToast('Error', errorMessage, 'error');
-            // Don't set this.error as it affects the entire view
-            // The modal will remain open for the user to retry
+            console.error('Error processing trigger action:', error);
+            const errorMessage = error.body?.message || error.message || 'Failed to process trigger action';
             
-            // Reset updating state after error
-            this.isUpdating = false;
+            // Check if this is a pre-deployment error that might still trigger a platform event
+            // In that case, we should wait for the platform event instead of showing the error immediately
+            if (errorMessage.includes('Error upserting trigger action')) {
+                console.log('Pre-deployment error detected, waiting for platform event callback...');
+                // Keep the loading state and wait for platform event
+                // The platform event will handle showing the error message
+                
+                // Set a timeout to show the error if platform event doesn't arrive within 10 seconds
+                setTimeout(() => {
+                    if (this.isUpdating) {
+                        console.log('Platform event timeout, showing original error message');
+                        this.showToast('Error', errorMessage, 'error');
+                        this.isUpdating = false;
+                    }
+                }, 10000);
+            } else {
+                // For other types of errors (network, etc.), show immediately
+                this.showToast('Error', errorMessage, 'error');
+                this.isUpdating = false;
+            }
         }
     }
 
@@ -532,15 +579,20 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     async subscribeToPlatformEvent() {
         const messageCallback = async (response) => {
             console.log('Platform event received:', response);
+            console.log('Platform event payload:', JSON.stringify(response.data.payload, null, 2));
             
             // Check if this event is for the current user
             const eventData = response.data.payload;
             const currentUserId = await this.getCurrentUserId();    
             console.log('Current user ID:', currentUserId);
+            console.log('Event data keys:', Object.keys(eventData));
+            console.log('Event data Message__c:', eventData.Message__c);
             
             if (eventData.UserId__c === currentUserId) {
                 console.log('Deployment callback received for current user');
-                this.handleDeploymentCallback(eventData.Status__c);
+                // Handle case where Message__c field might not exist yet
+                const message = eventData.Message__c || 'No message available';
+                this.handleDeploymentCallback(eventData.Status__c, message);
             } else {
                 console.log('Deployment callback received for different user, ignoring');
             }
@@ -583,9 +635,10 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     /**
      * Handles deployment callback from platform event
      * @param {string} status - The deployment status (succeeded, failed)
+     * @param {string} message - The deployment message
      */
-    async handleDeploymentCallback(status) {
-        console.log('Handling deployment callback with status:', status);
+    async handleDeploymentCallback(status, message) {
+        console.log('Handling deployment callback with status:', status, 'message:', message);
         
         if (status === 'succeeded') {
             console.log('Deployment succeeded, refreshing data from platform event...');
@@ -665,7 +718,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 console.log('Data refreshed successfully after platform event');
                 
                 // Close modal and show success message
-                this.showToast('Success', 'Trigger Action updated successfully', 'success');
+                this.showToast('Success', message || 'Trigger Action updated successfully', 'success');
                 this.handleModalClose();
                 
             } catch (error) {
@@ -674,11 +727,12 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             }
             
         } else if (status === 'failed') {
-            console.error('Deployment failed');
-            this.showToast('Error', 'Deployment failed. Please try again.', 'error');
+            console.error('Deployment failed:', message);
+            this.showToast('Error', message || 'Deployment failed. Please try again.', 'error');
         }
         
         // Reset updating state
         this.isUpdating = false;
     }
+
 }

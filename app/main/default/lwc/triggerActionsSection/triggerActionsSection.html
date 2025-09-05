@@ -1,12 +1,20 @@
 <template>
     <div class="slds-card">
-        <div class="slds-card__header slds-card__header_toggle" onclick={handleToggle}>
+        <div class="slds-card__header slds-card__header_toggle">
             <div class="slds-grid slds-grid_align-spread">
-                <div class="slds-media slds-media_center">
+                <div class="slds-media slds-media_center" onclick={handleToggle} style="cursor: pointer;">
                     <lightning-icon icon-name={chevronIcon} size="small" class={chevronClass}></lightning-icon>
                     <h3 class="slds-text-heading_medium">{title}</h3>
                 </div>
                 <div class="slds-no-flex">
+                    <lightning-button 
+                        variant="brand" 
+                        label="Add Action" 
+                        icon-name="utility:add"
+                        size="small"
+                        onclick={handleAddAction}
+                        class="slds-m-right_small">
+                    </lightning-button>
                     <slot name="actions"></slot>
                 </div>
             </div>
@@ -28,7 +36,9 @@
                 </template>
                 <template if:false={actions}>
                     <div class="slds-text-align_center slds-p-around_large">
-                        <p class="slds-text-color_weak">No actions</p>
+                        <lightning-icon icon-name="utility:info" size="small" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-color_weak slds-text-body_regular">No actions found</p>
+                        <p class="slds-text-color_weak slds-text-body_small slds-m-top_x-small">Click "Add Action" to create your first trigger action</p>
                     </div>
                 </template>
             </div>

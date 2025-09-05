@@ -40,6 +40,14 @@ export default class TriggerActionsSection extends LightningElement {
         this.dispatchEvent(new CustomEvent('delete', { detail: event.detail }));
     };
 
+    handleAddAction = () => {
+        this.dispatchEvent(new CustomEvent('addaction', { 
+            detail: { 
+                sectionTitle: this.title 
+            } 
+        }));
+    };
+
     handleToggle = () => {
         this.isExpanded = !this.isExpanded;
     };
