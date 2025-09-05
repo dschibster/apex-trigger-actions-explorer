@@ -9,6 +9,8 @@
 .cursorrules
 deploy-options.json
 
+.explanations
+
 # LWC VSCode autocomplete
 **/lwc/jsconfig.json
 
