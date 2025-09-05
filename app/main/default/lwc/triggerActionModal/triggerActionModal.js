@@ -15,6 +15,7 @@ export default class TriggerActionModal extends LightningElement {
     @track modalError = null;
     @track _currentActionId = null;
     @track _isCreateDataInitialized = false;
+    @track selectedActionType = 'flow'; // 'flow' or 'apex' - default to flow
 
     connectedCallback() {
         this.initializeData();
@@ -55,6 +56,14 @@ export default class TriggerActionModal extends LightningElement {
             // Create a deep copy of the action data
             this.actionData = JSON.parse(JSON.stringify(this.action));
             this.originalData = JSON.parse(JSON.stringify(this.action));
+            
+            // Set action type based on existing data
+            if (this.actionData.Flow_Name__c) {
+                this.selectedActionType = 'flow';
+            } else if (this.actionData.Apex_Class_Name__c) {
+                this.selectedActionType = 'apex';
+            }
+            
             this._isCreateDataInitialized = false;
         } else {
             // Clear data if no action
@@ -144,7 +153,19 @@ export default class TriggerActionModal extends LightningElement {
     }
 
     get isFlow() {
-        return this.actionData?.Flow_Name__c;
+        return this.selectedActionType === 'flow';
+    }
+
+    get flowButtonVariant() {
+        return this.selectedActionType === 'flow' ? 'brand' : 'neutral';
+    }
+
+    get apexButtonVariant() {
+        return this.selectedActionType === 'apex' ? 'brand' : 'neutral';
+    }
+
+    get isDescriptionRequired() {
+        return this.mode === 'create' || this.mode === 'edit';
     }
 
     handleFieldChange(event) {
@@ -155,6 +176,25 @@ export default class TriggerActionModal extends LightningElement {
             ...this.actionData,
             [field]: value
         };
+    }
+
+    handleActionTypeChange(event) {
+        const actionType = event.target.dataset.type;
+        this.selectedActionType = actionType;
+        
+        // Clear the opposite field when switching types
+        if (actionType === 'flow') {
+            this.actionData = {
+                ...this.actionData,
+                Apex_Class_Name__c: '',
+                Allow_Flow_Recursion__c: false
+            };
+        } else {
+            this.actionData = {
+                ...this.actionData,
+                Flow_Name__c: ''
+            };
+        }
     }
 
     handleEdit() {
@@ -168,29 +208,64 @@ export default class TriggerActionModal extends LightningElement {
         // Clear any previous errors
         this.modalError = null;
         
-        // Validate required fields for creation
+        // Validate required fields for creation and updates
         if (this.mode === 'create') {
-            if (!this.actionData.DeveloperName || !this.actionData.Label) {
-                this.modalError = 'Developer Name and Label are required fields.';
+            if (!this.actionData.DeveloperName?.trim() || !this.actionData.Label?.trim() || !this.actionData.Description__c?.trim()) {
+                this.modalError = 'Developer Name, Label, and Description are required fields.';
                 return;
             }
-            
-            if (!this.actionData.Apex_Class_Name__c && !this.actionData.Flow_Name__c) {
-                this.modalError = 'Either Apex Class Name or Flow Name must be provided.';
+        } else if (this.mode === 'edit') {
+            // For updates, only validate Description as required
+            if (!this.actionData.Description__c?.trim()) {
+                this.modalError = 'Description is required.';
                 return;
             }
         }
         
-        // Dispatch update event with the modified data
+        // Validate based on selected action type (for both create and edit modes)
+        if (this.mode === 'create' || this.mode === 'edit') {
+            if (this.selectedActionType === 'flow') {
+                if (!this.actionData.Flow_Name__c?.trim()) {
+                    this.modalError = 'Flow Name is required when Flow is selected.';
+                    return;
+                }
+            } else if (this.selectedActionType === 'apex') {
+                if (!this.actionData.Apex_Class_Name__c?.trim()) {
+                    this.modalError = 'Apex Class Name is required when Apex is selected.';
+                    return;
+                }
+            }
+        }
+        
+        // Filter the data to only include fields relevant to the selected action type
+        const filteredActionData = this.filterActionDataByType(this.actionData, this.selectedActionType);
+        
+        // Dispatch update event with the filtered data
         this.dispatchEvent(new CustomEvent('update', {
             detail: { 
                 actionId: this.mode === 'create' ? null : this.action.Id,
-                actionData: this.actionData,
+                actionData: filteredActionData,
                 mode: this.mode
             }
         }));
         
         // Note: Modal will be closed by the parent component after successful update
+    }
+
+    filterActionDataByType(actionData, actionType) {
+        // Create a copy of the action data
+        const filteredData = { ...actionData };
+        
+        if (actionType === 'flow') {
+            // For Flow, remove Apex-specific fields
+            delete filteredData.Apex_Class_Name__c;
+        } else if (actionType === 'apex') {
+            // For Apex, remove Flow-specific fields
+            delete filteredData.Flow_Name__c;
+            delete filteredData.Allow_Flow_Recursion__c;
+        }
+        
+        return filteredData;
     }
 
     handleClose() {
@@ -200,6 +275,8 @@ export default class TriggerActionModal extends LightningElement {
         this.mode = 'view';
         // Reset create data initialization flag
         this._isCreateDataInitialized = false;
+        // Reset action type to default
+        this.selectedActionType = 'flow';
         this.dispatchEvent(new CustomEvent('close'));
     }
 
@@ -210,6 +287,8 @@ export default class TriggerActionModal extends LightningElement {
         this.actionData = JSON.parse(JSON.stringify(this.originalData));
         // Reset create data initialization flag
         this._isCreateDataInitialized = false;
+        // Reset action type to default
+        this.selectedActionType = 'flow';
         
         if (this.mode === 'create') {
             // For creation mode, cancel should close the modal entirely

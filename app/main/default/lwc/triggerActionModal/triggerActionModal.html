@@ -59,14 +59,43 @@
                             </lightning-layout-item>
                         </template>
                         
-                        <!-- Row 2: Description (full width) -->
+                        <!-- Row 2: Action Type Choice (for creation mode) -->
+                        <template if:true={isCreateMode}>
+                            <lightning-layout-item size="12" padding="around-small">
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label">Action Type</label>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-button-group" role="group">
+                                            <lightning-button 
+                                                variant={flowButtonVariant}
+                                                icon-name="utility:flow"
+                                                label="Flow"
+                                                onclick={handleActionTypeChange}
+                                                data-type="flow"
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button 
+                                                variant={apexButtonVariant}
+                                                icon-name="utility:apex"
+                                                label="Apex"
+                                                onclick={handleActionTypeChange}
+                                                data-type="apex">
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </lightning-layout-item>
+                        </template>
+                        
+                        <!-- Row 3: Description (full width) -->
                         <lightning-layout-item size="12" padding="around-small">
                             <lightning-input 
                                 label="Description" 
                                 value={actionData.Description__c}
                                 onchange={handleFieldChange}
                                 data-field="Description__c"
-                                disabled={isReadOnly}>
+                                disabled={isReadOnly}
+                                required={isDescriptionRequired}>
                             </lightning-input>
                         </lightning-layout-item>
                         
