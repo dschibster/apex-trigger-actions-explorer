@@ -37,29 +37,9 @@
                     <!-- Form Content (hidden during update) -->
                     <template if:false={isUpdating}>
                     <lightning-layout multiple-rows="true">
-                        <!-- Row 1: Developer Name and Label (for creation mode) -->
-                        <template if:true={isCreateMode}>
-                            <lightning-layout-item size="6" padding="around-small">
-                                <lightning-input 
-                                    label="Developer Name" 
-                                    value={actionData.DeveloperName}
-                                    onchange={handleFieldChange}
-                                    data-field="DeveloperName"
-                                    required>
-                                </lightning-input>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="6" padding="around-small">
-                                <lightning-input 
-                                    label="Label" 
-                                    value={actionData.Label}
-                                    onchange={handleFieldChange}
-                                    data-field="Label"
-                                    required>
-                                </lightning-input>
-                            </lightning-layout-item>
-                        </template>
                         
-                        <!-- Row 2: Action Type Choice (for creation mode) -->
+                        
+                        <!-- Row 3: Action Type Choice (for creation mode) -->
                         <template if:true={isCreateMode}>
                             <lightning-layout-item size="12" padding="around-small">
                                 <div class="slds-form-element">
@@ -168,7 +148,19 @@
                             </lightning-layout-item>
                         </template>
                         
-                        <!-- Row 6: Allow Flow Recursion (if flow) -->
+                        <!-- Row 6: Apex Class Name (if flow - read-only) -->
+                        <template if:true={isFlow}>
+                            <lightning-layout-item size="12" padding="around-small">
+                                <lightning-input 
+                                    label="Apex Class Name" 
+                                    value={actionData.Apex_Class_Name__c}
+                                    disabled="true"
+                                    readonly="true">
+                                </lightning-input>
+                            </lightning-layout-item>
+                        </template>
+                        
+                        <!-- Row 7: Allow Flow Recursion (if flow) -->
                         <template if:true={isFlow}>
                             <lightning-layout-item size="12" padding="around-small">
                                 <lightning-input 

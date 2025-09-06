@@ -15,6 +15,35 @@
                         onclick={handleAddAction}
                         class="slds-m-right_small">
                     </lightning-button>
+                    <!-- Edit Order Button -->
+                    <template if:false={isEditOrderMode}>
+                        <lightning-button
+                            variant="neutral" 
+                            label="Edit Order"
+                            icon-name="utility:sort"
+                            onclick={handleEditOrder}
+                            size="small"
+                            class="slds-m-right_small">
+                        </lightning-button>
+                    </template>
+                    <!-- Save/Cancel Order Buttons -->
+                    <template if:true={isEditOrderMode}>
+                        <lightning-button-icon
+                            variant="success" 
+                            icon-name="utility:check" 
+                            title="Save Order"
+                            onclick={handleSaveOrder}
+                            size="small"
+                            class="slds-m-right_x-small">
+                        </lightning-button-icon>
+                        <lightning-button-icon
+                            variant="destructive" 
+                            icon-name="utility:close" 
+                            title="Cancel Order Changes"
+                            onclick={handleCancelEditOrder}
+                            size="small">
+                        </lightning-button-icon>
+                    </template>
                     <slot name="actions"></slot>
                 </div>
             </div>
@@ -27,9 +56,13 @@
                             <c-trigger-action-card 
                                 key={act.Id} 
                                 action={act}
+                                is-edit-order-mode={isEditOrderMode}
+                                action-type={actionType}
                                 onview={handleView}
                                 onedit={handleEdit}
-                                ondelete={handleDelete}>
+                                ondelete={handleDelete}
+                                onmoveup={handleMoveUp}
+                                onmovedown={handleMoveDown}>
                             </c-trigger-action-card>
                         </template>
                     </div>

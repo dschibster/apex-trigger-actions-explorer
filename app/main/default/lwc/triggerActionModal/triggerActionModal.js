@@ -34,8 +34,6 @@ export default class TriggerActionModal extends LightningElement {
         if (this.mode === 'create') {
             // Initialize with empty data for creation
             this.actionData = {
-                DeveloperName: '',
-                Label: '',
                 Description__c: '',
                 Order__c: 1,
                 Apex_Class_Name__c: '',
@@ -57,9 +55,13 @@ export default class TriggerActionModal extends LightningElement {
             this.actionData = JSON.parse(JSON.stringify(this.action));
             this.originalData = JSON.parse(JSON.stringify(this.action));
             
+            console.log('Initialized actionData for edit mode:', this.actionData);
+            
             // Set action type based on existing data
             if (this.actionData.Flow_Name__c) {
                 this.selectedActionType = 'flow';
+                // Ensure Apex Class Name is set to TriggerActionFlow for Flow actions
+                this.actionData.Apex_Class_Name__c = 'TriggerActionFlow';
             } else if (this.actionData.Apex_Class_Name__c) {
                 this.selectedActionType = 'apex';
             }
@@ -82,6 +84,7 @@ export default class TriggerActionModal extends LightningElement {
         // Only update if the action ID actually changed
         const newActionId = value?.Id || null;
         if (this._currentActionId !== newActionId) {
+            console.log('Action prop changed:', value);
             this._action = value;
             this._currentActionId = newActionId;
             // Re-initialize data when action changes
@@ -184,11 +187,13 @@ export default class TriggerActionModal extends LightningElement {
         
         // Clear the opposite field when switching types
         if (actionType === 'flow') {
+            console.log('Setting Apex Class Name to TriggerActionFlow for Flow action');
             this.actionData = {
                 ...this.actionData,
-                Apex_Class_Name__c: '',
+                Apex_Class_Name__c: 'TriggerActionFlow',
                 Allow_Flow_Recursion__c: false
             };
+            console.log('Updated actionData:', this.actionData);
         } else {
             this.actionData = {
                 ...this.actionData,
@@ -210,14 +215,14 @@ export default class TriggerActionModal extends LightningElement {
         
         // Validate required fields for creation and updates
         if (this.mode === 'create') {
-            if (!this.actionData.DeveloperName?.trim() || !this.actionData.Label?.trim() || !this.actionData.Description__c?.trim()) {
-                this.modalError = 'Developer Name, Label, and Description are required fields.';
+            if (!this.actionData.Description__c?.trim()) {
+                this.modalError = 'Description is a required field.';
                 return;
             }
         } else if (this.mode === 'edit') {
-            // For updates, only validate Description as required
+            // For updates, validate Description as required
             if (!this.actionData.Description__c?.trim()) {
-                this.modalError = 'Description is required.';
+                this.modalError = 'Description is a required field.';
                 return;
             }
         }
@@ -240,6 +245,10 @@ export default class TriggerActionModal extends LightningElement {
         // Filter the data to only include fields relevant to the selected action type
         const filteredActionData = this.filterActionDataByType(this.actionData, this.selectedActionType);
         
+        console.log('Sending actionData to Apex:', filteredActionData);
+        console.log('Apex Class Name in filtered data:', filteredActionData.Apex_Class_Name__c);
+        console.log('Flow Name in filtered data:', filteredActionData.Flow_Name__c);
+        
         // Dispatch update event with the filtered data
         this.dispatchEvent(new CustomEvent('update', {
             detail: { 
@@ -256,9 +265,11 @@ export default class TriggerActionModal extends LightningElement {
         // Create a copy of the action data
         const filteredData = { ...actionData };
         
+        // Label field is already in the correct format for saving
+        
         if (actionType === 'flow') {
-            // For Flow, remove Apex-specific fields
-            delete filteredData.Apex_Class_Name__c;
+            // For Flow, keep Apex_Class_Name__c as it needs to be set to TriggerActionFlow
+            // Only remove other Apex-specific fields if any
         } else if (actionType === 'apex') {
             // For Apex, remove Flow-specific fields
             delete filteredData.Flow_Name__c;

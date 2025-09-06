@@ -21,15 +21,41 @@ public class TriggerActionDeployCallback implements Metadata.DeployCallback {
             System.debug('Creating platform event with UserId: ' + currentUserId);
             
             if (result.status == Metadata.DeployStatus.Succeeded) {
-                System.debug('Trigger Action metadata deployment succeeded.');
-                System.debug('Deployment details: ' + result);
+                System.debug('=== DEPLOYMENT SUCCESS ===');
+                System.debug('Deployment ID: ' + result.id);
+                System.debug('Deployment success: ' + result.success);
+                System.debug('Deployment done: ' + result.done);
+                System.debug('Deployment status: ' + result.status);
+                
+                // Log component details
+                if (result.details != null) {
+                    System.debug('Component successes count: ' + (result.details.componentSuccesses != null ? result.details.componentSuccesses.size() : 0));
+                    System.debug('Component failures count: ' + (result.details.componentFailures != null ? result.details.componentFailures.size() : 0));
+                    
+                    if (result.details.componentSuccesses != null && !result.details.componentSuccesses.isEmpty()) {
+                        for (Metadata.DeployMessage success : result.details.componentSuccesses) {
+                            System.debug('SUCCESS: ' + success.fullName + ' - ' + success.componentType);
+                        }
+                    }
+                    
+                    if (result.details.componentFailures != null && !result.details.componentFailures.isEmpty()) {
+                        for (Metadata.DeployMessage failure : result.details.componentFailures) {
+                            System.debug('FAILURE: ' + failure.fullName + ' - ' + failure.problem);
+                        }
+                    }
+                } else {
+                    System.debug('WARNING: Deployment details are null despite success status');
+                }
+                
                 callbackEvent.Status__c = 'succeeded';
                 callbackEvent.Message__c = 'Trigger Action deployed successfully';
                 System.debug('Setting success message: ' + callbackEvent.Message__c);
             } else {
-                System.debug('Trigger Action metadata deployment failed.');
+                System.debug('=== DEPLOYMENT FAILED ===');
                 System.debug('Deployment status: ' + result.status);
-                System.debug('Error details: ' + result);
+                System.debug('Deployment ID: ' + result.id);
+                System.debug('Deployment success: ' + result.success);
+                System.debug('Deployment done: ' + result.done);
                 callbackEvent.Status__c = 'failed';
                 
                 // Collect error messages

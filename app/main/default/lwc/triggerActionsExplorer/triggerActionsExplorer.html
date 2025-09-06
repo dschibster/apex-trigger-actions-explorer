@@ -119,9 +119,16 @@
                                             <c-trigger-actions-section 
                                                 title="Before Actions" 
                                                 actions={beforeActions} 
+                                                is-edit-order-mode={isEditOrderMode}
+                                                action-type="before"
                                                 onview={handleViewAction}
                                                 onedit={handleEditAction} 
-                                                onaddaction={handleAddAction}>
+                                                onaddaction={handleAddAction}
+                                                onmoveup={handleMoveUp}
+                                                onmovedown={handleMoveDown}
+                                                oneditorder={handleEditOrder}
+                                                onsaveorder={handleSaveOrder}
+                                                oncanceleditorder={handleCancelEditOrder}>
                                             </c-trigger-actions-section>
                                         </div>
                                     </template>
@@ -131,9 +138,16 @@
                                             <c-trigger-actions-section 
                                                 title="After Actions" 
                                                 actions={afterActions} 
+                                                is-edit-order-mode={isEditOrderMode}
+                                                action-type="after"
                                                 onview={handleViewAction}
                                                 onedit={handleEditAction} 
-                                                onaddaction={handleAddAction}>
+                                                onaddaction={handleAddAction}
+                                                onmoveup={handleMoveUp}
+                                                onmovedown={handleMoveDown}
+                                                oneditorder={handleEditOrder}
+                                                onsaveorder={handleSaveOrder}
+                                                oncanceleditorder={handleCancelEditOrder}>
                                             </c-trigger-actions-section>
                                         </div>
                                     </template>

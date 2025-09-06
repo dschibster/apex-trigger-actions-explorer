@@ -36,6 +36,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track afterActions = [];
     @track showSections = true;
     
+    // Edit order mode properties
+    @track isEditOrderMode = false;
+    @track originalBeforeActions = [];
+    @track originalAfterActions = [];
+    
     // Platform event subscription properties
     subscription = null;
     channelName = '/event/TriggerActionsExplorerCallback__e';
@@ -148,6 +153,102 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         await this.loadData();
     }
 
+    // Edit order mode methods
+    handleEditOrder(event) {
+        const { actionType } = event.detail;
+        console.log(`Entering edit order mode for ${actionType} section`);
+        console.log('Before actions count:', this.beforeActions.length);
+        console.log('After actions count:', this.afterActions.length);
+        this.isEditOrderMode = true;
+        // Store original order for potential cancellation
+        this.originalBeforeActions = [...this.beforeActions];
+        this.originalAfterActions = [...this.afterActions];
+        console.log('isEditOrderMode set to:', this.isEditOrderMode);
+    }
+
+    handleCancelEditOrder(event) {
+        const { actionType } = event.detail;
+        console.log(`Cancelling edit order mode for ${actionType} section`);
+        this.isEditOrderMode = false;
+        // Restore original order
+        this.beforeActions = [...this.originalBeforeActions];
+        this.afterActions = [...this.originalAfterActions];
+    }
+
+    async handleSaveOrder(event) {
+        const { actionType } = event.detail;
+        console.log(`Saving new order for ${actionType} section`);
+        // TODO: Implement order saving logic
+        this.isEditOrderMode = false;
+        // Clear original arrays
+        this.originalBeforeActions = [];
+        this.originalAfterActions = [];
+    }
+
+    // Order control methods
+    handleMoveUp(event) {
+        console.log('=== EXPLORER: handleMoveUp called ===');
+        console.log('Event detail:', event.detail);
+        const { actionId, actionType } = event.detail;
+        console.log('Extracted - actionId:', actionId, 'actionType:', actionType);
+        this.moveAction(actionId, actionType, 'up');
+        console.log('=== END EXPLORER: handleMoveUp ===');
+    }
+
+    handleMoveDown(event) {
+        console.log('=== EXPLORER: handleMoveDown called ===');
+        console.log('Event detail:', event.detail);
+        const { actionId, actionType } = event.detail;
+        console.log('Extracted - actionId:', actionId, 'actionType:', actionType);
+        this.moveAction(actionId, actionType, 'down');
+        console.log('=== END EXPLORER: handleMoveDown ===');
+    }
+
+    moveAction(actionId, actionType, direction) {
+        console.log(`Moving action ${actionId} ${direction} in ${actionType} section`);
+        console.log('Before actions:', this.beforeActions.map(a => `${a.Name} (${a.Id})`));
+        console.log('After actions:', this.afterActions.map(a => `${a.Name} (${a.Id})`));
+        
+        const actions = actionType === 'before' ? this.beforeActions : this.afterActions;
+        console.log(`Selected ${actionType} actions array:`, actions.map(a => `${a.Name} (${a.Id})`));
+        
+        const currentIndex = actions.findIndex(action => action.Id === actionId);
+        console.log('Current index:', currentIndex);
+        
+        if (currentIndex === -1) {
+            console.log('Action not found in', actionType, 'array');
+            return;
+        }
+        
+        let newIndex;
+        if (direction === 'up') {
+            newIndex = currentIndex - 1;
+            if (newIndex < 0) {
+                console.log('Already at top');
+                return;
+            }
+        } else {
+            newIndex = currentIndex + 1;
+            if (newIndex >= actions.length) {
+                console.log('Already at bottom');
+                return;
+            }
+        }
+        
+        // Create new array and swap positions
+        const newActions = [...actions];
+        [newActions[currentIndex], newActions[newIndex]] = [newActions[newIndex], newActions[currentIndex]];
+        
+        // Update the appropriate array
+        if (actionType === 'before') {
+            this.beforeActions = newActions;
+        } else {
+            this.afterActions = newActions;
+        }
+        
+        console.log(`Moved action to position ${newIndex}`);
+    }
+
     handleEditSetting() {
         if (this.selectedSetting) {
             // Find the current setting data
@@ -218,7 +319,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 
                 const actionObj = {
                     Id: action.Id,
-                    Name: action.DeveloperName,
+                    Name: action.Label || action.DeveloperName,
                     Description__c: action.Description__c || 'No description provided',
                     Order__c: action.Order__c || 0,
                     Apex_Class_Name__c: action.Apex_Class_Name__c || null,
@@ -243,7 +344,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 
                 const actionObj = {
                     Id: action.Id,
-                    Name: action.DeveloperName,
+                    Name: action.Label || action.DeveloperName,
                     Description__c: action.Description__c || 'No description provided',
                     Order__c: action.Order__c || 0,
                     Apex_Class_Name__c: action.Apex_Class_Name__c || null,
@@ -401,6 +502,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         const actionId = event.detail.actionId;
         const action = this.findActionById(actionId);
         if (action) {
+            console.log('Opening edit modal with action:', action);
             this.selectedAction = action;
             this.modalMode = 'edit';
             this.isModalOpen = true;
@@ -565,6 +667,21 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
 
     get isEditSettingDisabled() {
         return this.isLoading || !this.selectedSetting;
+    }
+
+    get isEditOrderDisabled() {
+        const disabled = !this.selectedSetting || !this.selectedContext || !this.selectedTiming || 
+               this.isLoading || (this.beforeActions.length === 0 && this.afterActions.length === 0);
+        console.log('isEditOrderDisabled check:', {
+            selectedSetting: this.selectedSetting,
+            selectedContext: this.selectedContext,
+            selectedTiming: this.selectedTiming,
+            isLoading: this.isLoading,
+            beforeActionsLength: this.beforeActions.length,
+            afterActionsLength: this.afterActions.length,
+            disabled: disabled
+        });
+        return disabled;
     }
 
     get testData() {

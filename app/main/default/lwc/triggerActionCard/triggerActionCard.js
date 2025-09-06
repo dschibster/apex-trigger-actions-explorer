@@ -2,11 +2,18 @@ import { LightningElement, api } from 'lwc';
 
 export default class TriggerActionCard extends LightningElement {
     @api action;
+    @api isEditOrderMode = false;
+    @api actionType; // 'before' or 'after'
 
     connectedCallback() {
         console.log('=== TriggerActionCard connected ===');
         console.log('Action received:', this.action);
-        console.log(this.action.Bypass_Execution__c);
+        console.log('Action keys:', this.action ? Object.keys(this.action) : 'No action');
+        console.log('Flow_Name__c:', this.action?.Flow_Name__c);
+        console.log('Apex_Class_Name__c:', this.action?.Apex_Class_Name__c);
+        console.log('isEditOrderMode:', this.isEditOrderMode);
+        console.log('actionType:', this.actionType);
+        console.log('actionTypeLabel:', this.actionTypeLabel);
         console.log('=== End connected ===');
     }
 
@@ -15,12 +22,8 @@ export default class TriggerActionCard extends LightningElement {
     }
 
     get displayName() {
-        if (this.action?.Flow_Name__c) {
-            return this.action.Flow_Name__c;
-        } else if (this.action?.Apex_Class_Name__c) {
-            return this.action.Apex_Class_Name__c;
-        }
-        return 'Unnamed Action';
+        // Use the Name field which contains the MasterLabel
+        return this.action?.Name || 'Unnamed Action';
     }
 
 
@@ -32,8 +35,12 @@ export default class TriggerActionCard extends LightningElement {
         return !this.action?.Bypass_Execution__c ? 'Active' : 'Bypassed';
     }
 
-    get actionType() {
+    get actionTypeLabel() {
         return this.action?.Flow_Name__c ? 'Flow' : 'Apex';
+    }
+
+    get classOrFlowName() {
+        return this.action?.Flow_Name__c || this.action?.Apex_Class_Name__c || '';
     }
 
     get metadataUrl() {
@@ -57,6 +64,34 @@ export default class TriggerActionCard extends LightningElement {
                 }));
                 break;
         }
+    }
+
+    handleMoveUp() {
+        console.log('=== CARD: handleMoveUp called ===');
+        console.log('actionId:', this.action.Id);
+        console.log('actionType:', this.actionType);
+        
+        this.dispatchEvent(new CustomEvent('moveup', {
+            detail: { 
+                actionId: this.action.Id, 
+                actionType: this.actionType 
+            }
+        }));
+        console.log('=== END CARD: handleMoveUp ===');
+    }
+
+    handleMoveDown() {
+        console.log('=== CARD: handleMoveDown called ===');
+        console.log('actionId:', this.action.Id);
+        console.log('actionType:', this.actionType);
+        
+        this.dispatchEvent(new CustomEvent('movedown', {
+            detail: { 
+                actionId: this.action.Id, 
+                actionType: this.actionType 
+            }
+        }));
+        console.log('=== END CARD: handleMoveDown ===');
     }
 }
 

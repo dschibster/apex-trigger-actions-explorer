@@ -32,42 +32,41 @@ public with sharing class TriggerActionsExplorerController {
             // Parse the incoming JSON data
             Map<String, Object> actionMap = (Map<String, Object>) JSON.deserializeUntyped(actionData);
             
-            // Extract required fields - use DeveloperName from the action data
-            String developerName = (String) actionMap.get('DeveloperName');
-            String label = (String) actionMap.get('Label');
+            // Determine the action type and set appropriate fields first
+            String flowName = (String) actionMap.get('Flow_Name__c');
+            String apexClassName = (String) actionMap.get('Apex_Class_Name__c');
             
-            // If DeveloperName is not provided, try to get it from the Id or Name field
-            if (String.isBlank(developerName)) {
-                developerName = (String) actionMap.get('Name');
-            }
-            
-            // If still blank, try to extract from Id
-            if (String.isBlank(developerName)) {
-                String id = (String) actionMap.get('Id');
-                if (String.isNotBlank(id)) {
-                    // Extract DeveloperName from the Id (assuming it's the DeveloperName)
-                    developerName = id;
-                }
-            }
-            
-            if (String.isBlank(developerName)) {
-                throw new AuraHandledException('DeveloperName is required to identify the trigger action');
-            }
-            
-            // Use DeveloperName as label if label is not provided
-            if (String.isBlank(label)) {
-                label = developerName;
+            // Auto-generate DeveloperName based on Flow Name or Apex Class Name
+            String developerName;
+            if (String.isNotBlank(flowName)) {
+                developerName = flowName;
+            } else if (String.isNotBlank(apexClassName)) {
+                developerName = apexClassName;
+            } else {
+                throw new AuraHandledException('Either Flow Name or Apex Class Name is required to generate DeveloperName');
             }
             
             // Create the custom metadata record
             Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
             customMetadata.fullName = 'Trigger_Action__mdt.' + developerName;
-            customMetadata.label = label;
+            
+            // Set the label to the same value as DeveloperName for consistency
+            customMetadata.label = developerName;
+            
+            System.debug('Auto-generated DeveloperName: ' + developerName);
+            
+            // If Flow Name is provided, automatically set Apex Class Name to TriggerActionFlow
+            if (String.isNotBlank(flowName)) {
+                apexClassName = 'TriggerActionFlow';
+                System.debug('Setting Apex Class Name to TriggerActionFlow for Flow: ' + flowName);
+            }
+            
+            System.debug('Final Apex Class Name: ' + apexClassName);
             
             // Add field values using the actual field names from the Trigger Action data
             addFieldValue(customMetadata, 'Description__c', (String) actionMap.get('Description__c'));
-            addFieldValue(customMetadata, 'Apex_Class_Name__c', (String) actionMap.get('Apex_Class_Name__c'));
-            addFieldValue(customMetadata, 'Flow_Name__c', (String) actionMap.get('Flow_Name__c'));
+            addFieldValue(customMetadata, 'Apex_Class_Name__c', apexClassName);
+            addFieldValue(customMetadata, 'Flow_Name__c', flowName);
             addFieldValue(customMetadata, 'Entry_Criteria__c', (String) actionMap.get('Entry_Criteria__c'));
             addFieldValue(customMetadata, 'Required_Permission__c', (String) actionMap.get('Required_Permission__c'));
             addFieldValue(customMetadata, 'Bypass_Permission__c', (String) actionMap.get('Bypass_Permission__c'));
@@ -91,6 +90,16 @@ public with sharing class TriggerActionsExplorerController {
             // Deploy the metadata
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(customMetadata);
+            
+            System.debug('=== DEPLOYMENT PREPARATION ===');
+            System.debug('Deploying custom metadata: ' + customMetadata.fullName);
+            System.debug('Custom metadata label: ' + customMetadata.label);
+            System.debug('Number of field values: ' + customMetadata.values.size());
+            
+            // Log all field values being deployed
+            for (Metadata.CustomMetadataValue fieldValue : customMetadata.values) {
+                System.debug('Field: ' + fieldValue.field + ' = ' + fieldValue.value);
+            }
             
             // Create callback and deploy
             Metadata.DeployCallback callback = new TriggerActionDeployCallback();
@@ -171,7 +180,11 @@ public with sharing class TriggerActionsExplorerController {
             // Create CustomMetadata object
             Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
             customMetadata.fullName = 'sObject_Trigger_Setting__mdt.' + developerName;
-            customMetadata.label = label;
+            
+            // Set label to Object API Name for better identification
+            String objectApiName = (String) settingMap.get('Object_API_Name__c');
+            String metadataLabel = String.isNotBlank(objectApiName) ? objectApiName : developerName;
+            customMetadata.label = metadataLabel;
             
             // Add field values
             System.debug('Adding field values...');
@@ -293,6 +306,60 @@ public with sharing class TriggerActionsExplorerController {
     @AuraEnabled
     public static String getCurrentUserId() {
         return UserInfo.getUserId();
+    }
+    
+    /**
+     * Verifies if a Trigger Action custom metadata record exists
+     * @param developerName The DeveloperName of the record to check
+     * @return Boolean indicating if the record exists
+     */
+    @AuraEnabled
+    public static Boolean verifyTriggerActionExists(String developerName) {
+        try {
+            List<Trigger_Action__mdt> existingRecords = [
+                SELECT Id, DeveloperName, Label 
+                FROM Trigger_Action__mdt 
+                WHERE DeveloperName = :developerName 
+                LIMIT 1
+            ];
+            
+            Boolean exists = !existingRecords.isEmpty();
+            System.debug('Trigger Action verification for ' + developerName + ': ' + exists);
+            if (exists) {
+                System.debug('Found record with Label: ' + existingRecords[0].Label);
+            }
+            return exists;
+        } catch (Exception e) {
+            System.debug('Error verifying trigger action existence: ' + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Verifies if a SObject Trigger Setting custom metadata record exists
+     * @param developerName The DeveloperName of the record to check
+     * @return Boolean indicating if the record exists
+     */
+    @AuraEnabled
+    public static Boolean verifyTriggerSettingExists(String developerName) {
+        try {
+            List<sObject_Trigger_Setting__mdt> existingRecords = [
+                SELECT Id, DeveloperName, Object_API_Name__c 
+                FROM sObject_Trigger_Setting__mdt 
+                WHERE DeveloperName = :developerName 
+                LIMIT 1
+            ];
+            
+            Boolean exists = !existingRecords.isEmpty();
+            System.debug('Trigger Setting verification for ' + developerName + ': ' + exists);
+            if (exists) {
+                System.debug('Found record with Object API Name: ' + existingRecords[0].Object_API_Name__c);
+            }
+            return exists;
+        } catch (Exception e) {
+            System.debug('Error verifying trigger setting existence: ' + e.getMessage());
+            return false;
+        }
     }
     
     /**
