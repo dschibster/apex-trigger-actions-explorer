@@ -7,14 +7,41 @@
                     <h3 class="slds-text-heading_medium">{title}</h3>
                 </div>
                 <div class="slds-no-flex">
-                    <lightning-button 
-                        variant="neutral" 
-                        label="Add Action" 
-                        icon-name="utility:add"
-                        size="small"
-                        onclick={handleAddAction}
-                        class="slds-m-right_small">
-                    </lightning-button>
+                    <template if:false={isEditOrderMode}>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Add Action" 
+                            icon-name="utility:add"
+                            size="small"
+                            onclick={handleAddAction}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Edit Order" 
+                            icon-name="utility:sort"
+                            size="small"
+                            onclick={handleEditOrder}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                    </template>
+                    <template if:true={isEditOrderMode}>
+                        <lightning-button 
+                            variant="brand" 
+                            label="Save Order" 
+                            icon-name="utility:check"
+                            size="small"
+                            onclick={handleSaveOrder}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Cancel" 
+                            icon-name="utility:close"
+                            size="small"
+                            onclick={handleCancelOrder}>
+                        </lightning-button>
+                    </template>
                     <slot name="actions"></slot>
                 </div>
             </div>
@@ -27,9 +54,13 @@
                             <c-trigger-action-card 
                                 key={act.Id} 
                                 action={act}
+                                is-edit-order-mode={isEditOrderMode}
+                                is-first-item={act.isFirstItem}
+                                is-last-item={act.isLastItem}
                                 onview={handleView}
                                 onedit={handleEdit}
-                                ondelete={handleDelete}>
+                                ondelete={handleDelete}
+                                onmoveaction={handleMoveAction}>
                             </c-trigger-action-card>
                         </template>
                     </div>

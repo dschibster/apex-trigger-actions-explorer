@@ -873,4 +873,48 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         this.isUpdating = false;
     }
 
+    // Handle entering edit mode - exit other sections
+    handleEnterEditMode(event) {
+        const { sectionTitle } = event.detail;
+        console.log('Entering edit mode for section:', sectionTitle);
+        
+        // Get all section components and exit edit mode for others
+        const sectionComponents = this.template.querySelectorAll('c-trigger-actions-section');
+        sectionComponents.forEach(section => {
+            if (section.title !== sectionTitle) {
+                section.exitEditMode();
+            }
+        });
+    }
+
+    // Handle saving order changes
+    async handleSaveOrder(event) {
+        const { sectionTitle, updatedActions } = event.detail;
+        console.log('Saving order for section:', sectionTitle, 'Updated actions:', updatedActions);
+        
+        try {
+            this.isUpdating = true;
+            
+            // For now, just update the local arrays (frontend only as requested)
+            if (sectionTitle === 'Before Actions') {
+                this.beforeActions = updatedActions;
+            } else if (sectionTitle === 'After Actions') {
+                this.afterActions = updatedActions;
+            }
+            
+            // Force reactivity update
+            this.beforeActions = [...this.beforeActions];
+            this.afterActions = [...this.afterActions];
+            
+            console.log('Order updated successfully');
+            this.showToast('Success', 'Order updated successfully', 'success');
+            
+        } catch (error) {
+            console.error('Error updating order:', error);
+            this.showToast('Error', 'Failed to update order', 'error');
+        } finally {
+            this.isUpdating = false;
+        }
+    }
+
 }
