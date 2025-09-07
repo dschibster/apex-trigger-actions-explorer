@@ -5,6 +5,31 @@
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <span class="slds-text-heading_small slds-text-color_weak">{action.Order__c}</span>
             </div>
+            <template if:true={isEditOrderMode}>
+                <div class="slds-grid slds-grid_vertical slds-grid_align-center">
+                  <lightning-button-icon
+                    variant="neutral"
+                    icon-name="utility:up"
+                    size="x-small"
+                    title="Move Up"
+                    onclick={handleMoveUp}
+                    disabled={isFirstItem}
+                    class="slds-m-bottom_xx-small"
+                  >
+                  </lightning-button-icon>
+                  <lightning-button-icon
+                    variant="neutral"
+                    icon-name="utility:down"
+                    size="x-small"
+                    title="Move Down"
+                    onclick={handleMoveDown}
+                    disabled={isLastItem}
+
+                  >
+                  </lightning-button-icon>
+                </div>
+              </template>
+              
             
             <!-- Icon -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
@@ -54,26 +79,6 @@
                         <lightning-menu-item value="view" label="View Details"></lightning-menu-item>
                         <lightning-menu-item value="edit" label="Edit"></lightning-menu-item>
                     </lightning-button-menu>
-                </template>
-                <template if:true={isEditOrderMode}>
-                    <div class="slds-button-group slds-button-group_vertical">
-                        <lightning-button 
-                            variant="neutral" 
-                            icon-name="utility:up"
-                            size="small"
-                            onclick={handleMoveUp}
-                            disabled={isFirstItem}
-                            title="Move Up">
-                        </lightning-button>
-                        <lightning-button 
-                            variant="neutral" 
-                            icon-name="utility:down"
-                            size="small"
-                            onclick={handleMoveDown}
-                            disabled={isLastItem}
-                            title="Move Down">
-                        </lightning-button>
-                    </div>
                 </template>
             </div>
         </div>
