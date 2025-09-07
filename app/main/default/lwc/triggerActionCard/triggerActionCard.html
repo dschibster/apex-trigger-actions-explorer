@@ -14,6 +14,7 @@
                             size="x-small"
                             title="Move Up"
                             onclick={handleMoveUp}
+                            disabled={isFirstItem}
                             class="slds-m-bottom_xx-small">
                         </lightning-button-icon>
                         <lightning-button-icon
@@ -21,7 +22,8 @@
                             icon-name="utility:down"
                             size="x-small"
                             title="Move Down"
-                            onclick={handleMoveDown}>
+                            onclick={handleMoveDown}
+                            disabled={isLastItem}>
                         </lightning-button-icon>
                     </div>
                 </template>
