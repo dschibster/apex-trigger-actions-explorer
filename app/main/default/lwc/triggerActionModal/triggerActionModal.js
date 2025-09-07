@@ -15,18 +15,73 @@ export default class TriggerActionModal extends LightningElement {
     @track modalError = null;
     @track _currentActionId = null;
     @track _isCreateDataInitialized = false;
-    @track selectedActionType = 'flow'; // 'flow' or 'apex' - default to flow
+    @track selectedActionType = 'apex'; // 'apex', 'flow', or 'flow-cdp' - default to apex
+
+    // Context abbreviation mapping based on triggerContext and sectionContext
+    get contextAbbreviation() {
+        // triggerContext: CREATED, UPDATED, DELETED, RESTORED
+        // sectionContext: before, after
+        if (this.sectionContext === 'before') {
+            switch (this.triggerContext) {
+                case 'CREATED': return 'BI'; // Before Insert
+                case 'UPDATED': return 'BU'; // Before Update
+                case 'DELETED': return 'BD'; // Before Delete
+                default: return '';
+            }
+        } else if (this.sectionContext === 'after') {
+            switch (this.triggerContext) {
+                case 'CREATED': return 'AI'; // After Insert
+                case 'UPDATED': return 'AU'; // After Update
+                case 'DELETED': return 'AD'; // After Delete
+                case 'RESTORED': return 'AUD'; // After Undelete
+                default: return '';
+            }
+        }
+        return '';
+    }
+
+    // Generate DeveloperName based on action type and context
+    generateDeveloperName() {
+        let baseName = '';
+        if ((this.selectedActionType === 'flow' || this.selectedActionType === 'flow-cdp') && this.actionData.Flow_Name__c) {
+            baseName = this.actionData.Flow_Name__c;
+        } else if (this.selectedActionType === 'apex' && this.actionData.Apex_Class_Name__c) {
+            baseName = this.actionData.Apex_Class_Name__c;
+        }
+        
+        if (baseName && this.contextAbbreviation) {
+            return `${baseName}_${this.contextAbbreviation}`;
+        }
+        return baseName;
+    }
+
+    // Update DeveloperName and Label for create mode
+    updateDeveloperNameAndLabel() {
+        if (this.mode === 'create') {
+            const generatedName = this.generateDeveloperName();
+            if (generatedName) {
+                this.actionData.DeveloperName = generatedName;
+                this.actionData.Label = generatedName;
+            }
+        }
+    }
 
     connectedCallback() {
         this.initializeData();
     }
 
+    // Watch for isOpen changes to reset modal state when closed
     renderedCallback() {
         // Only initialize data when modal opens and data is not already initialized
         // Don't re-initialize if we're in create mode and data has already been initialized
         if (this.isOpen && (!this.actionData || Object.keys(this.actionData).length === 0) && 
             !(this.mode === 'create' && this._isCreateDataInitialized)) {
             this.initializeData();
+        }
+        
+        // Reset modal state when it's closed
+        if (!this.isOpen && this.actionData && Object.keys(this.actionData).length > 0) {
+            this.resetModalState();
         }
     }
 
@@ -50,6 +105,9 @@ export default class TriggerActionModal extends LightningElement {
             // Set the appropriate trigger context field based on section and trigger context
             this.setTriggerContextField();
             
+            // Set initial DeveloperName and Label based on action type and context
+            this.updateDeveloperNameAndLabel();
+            
             this.originalData = JSON.parse(JSON.stringify(this.actionData));
             this._isCreateDataInitialized = true;
         } else if (this.action && Object.keys(this.action).length > 0) {
@@ -59,7 +117,15 @@ export default class TriggerActionModal extends LightningElement {
             
             // Set action type based on existing data
             if (this.actionData.Flow_Name__c) {
-                this.selectedActionType = 'flow';
+                // Check if it's Flow (CDP) based on Apex Class Name
+                if (this.actionData.Apex_Class_Name__c === 'TriggerActionFlowChangeEvent') {
+                    this.selectedActionType = 'flow-cdp';
+                } else if (this.actionData.Apex_Class_Name__c === 'TriggerActionFlow') {
+                    this.selectedActionType = 'flow';
+                } else {
+                    // Default to flow if Flow_Name__c is present but Apex_Class_Name__c is not set
+                    this.selectedActionType = 'flow';
+                }
             } else if (this.actionData.Apex_Class_Name__c) {
                 this.selectedActionType = 'apex';
             }
@@ -153,11 +219,15 @@ export default class TriggerActionModal extends LightningElement {
     }
 
     get isFlow() {
-        return this.selectedActionType === 'flow';
+        return this.selectedActionType === 'flow' || this.selectedActionType === 'flow-cdp';
     }
 
     get flowButtonVariant() {
         return this.selectedActionType === 'flow' ? 'brand' : 'neutral';
+    }
+
+    get flowCdpButtonVariant() {
+        return this.selectedActionType === 'flow-cdp' ? 'brand' : 'neutral';
     }
 
     get apexButtonVariant() {
@@ -176,24 +246,40 @@ export default class TriggerActionModal extends LightningElement {
             ...this.actionData,
             [field]: value
         };
+        
+        // Regenerate DeveloperName and Label when Flow Name or Apex Class Name changes in create mode
+        if (this.mode === 'create' && (field === 'Flow_Name__c' || field === 'Apex_Class_Name__c')) {
+            this.updateDeveloperNameAndLabel();
+        }
     }
 
     handleActionTypeChange(event) {
         const actionType = event.target.dataset.type;
         this.selectedActionType = actionType;
         
-        // Clear the opposite field when switching types
+        // Clear the opposite field when switching types and set Apex Class Name for Flow types
         if (actionType === 'flow') {
             this.actionData = {
                 ...this.actionData,
-                Apex_Class_Name__c: '',
+                Apex_Class_Name__c: 'TriggerActionFlow',
                 Allow_Flow_Recursion__c: false
             };
-        } else {
+        } else if (actionType === 'flow-cdp') {
+            this.actionData = {
+                ...this.actionData,
+                Apex_Class_Name__c: 'TriggerActionFlowChangeEvent',
+                Allow_Flow_Recursion__c: false
+            };
+        } else if (actionType === 'apex') {
             this.actionData = {
                 ...this.actionData,
                 Flow_Name__c: ''
             };
+        }
+        
+        // Regenerate DeveloperName and Label for create mode
+        if (this.mode === 'create') {
+            this.updateDeveloperNameAndLabel();
         }
     }
 
@@ -224,7 +310,7 @@ export default class TriggerActionModal extends LightningElement {
         
         // Validate based on selected action type (for both create and edit modes)
         if (this.mode === 'create' || this.mode === 'edit') {
-            if (this.selectedActionType === 'flow') {
+            if (this.selectedActionType === 'flow' || this.selectedActionType === 'flow-cdp') {
                 if (!this.actionData.Flow_Name__c?.trim()) {
                     this.modalError = 'Flow Name is required when Flow is selected.';
                     return;
@@ -257,8 +343,12 @@ export default class TriggerActionModal extends LightningElement {
         const filteredData = { ...actionData };
         
         if (actionType === 'flow') {
-            // For Flow, remove Apex-specific fields
-            delete filteredData.Apex_Class_Name__c;
+            // For Flow, keep Apex_Class_Name__c (TriggerActionFlow) but remove other Apex-specific fields
+            // Don't delete Apex_Class_Name__c as it's required for Flow validation
+        } else if (actionType === 'flow-cdp') {
+            // For Flow (CDP), keep both Flow_Name__c and Apex_Class_Name__c (TriggerActionFlowChangeEvent)
+            // Only remove Allow_Flow_Recursion__c as it's not applicable to CDP flows
+            delete filteredData.Allow_Flow_Recursion__c;
         } else if (actionType === 'apex') {
             // For Apex, remove Flow-specific fields
             delete filteredData.Flow_Name__c;
@@ -266,6 +356,16 @@ export default class TriggerActionModal extends LightningElement {
         }
         
         return filteredData;
+    }
+
+    resetModalState() {
+        // Reset all modal state to original values
+        this.actionData = {};
+        this.originalData = {};
+        this.modalError = null;
+        this._currentActionId = null;
+        this._isCreateDataInitialized = false;
+        this.selectedActionType = 'apex'; // Reset to default
     }
 
     handleClose() {
@@ -276,7 +376,7 @@ export default class TriggerActionModal extends LightningElement {
         // Reset create data initialization flag
         this._isCreateDataInitialized = false;
         // Reset action type to default
-        this.selectedActionType = 'flow';
+        this.selectedActionType = 'apex';
         this.dispatchEvent(new CustomEvent('close'));
     }
 
@@ -288,7 +388,7 @@ export default class TriggerActionModal extends LightningElement {
         // Reset create data initialization flag
         this._isCreateDataInitialized = false;
         // Reset action type to default
-        this.selectedActionType = 'flow';
+        this.selectedActionType = 'apex';
         
         // For both create and edit modes, cancel should close the modal entirely
         this.dispatchEvent(new CustomEvent('close'));
