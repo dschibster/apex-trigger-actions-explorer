@@ -3,7 +3,30 @@
         <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-around_x-small">
             <!-- Order Number -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
-                <span class="slds-text-heading_small slds-text-color_weak">{action.Order__c}</span>
+                <template if:false={isEditOrderMode}>
+                    <span class="slds-text-heading_small slds-text-color_weak">{action.Order__c}</span>
+                </template>
+                <template if:true={isEditOrderMode}>
+                    <div class="slds-grid slds-grid_vertical slds-grid_align-center">
+                        <lightning-button-icon
+                            variant="neutral"
+                            icon-name="utility:up"
+                            size="x-small"
+                            title="Move Up"
+                            onclick={handleMoveUp}
+                            disabled={isFirstItem}
+                            class="slds-m-bottom_xx-small">
+                        </lightning-button-icon>
+                        <lightning-button-icon
+                            variant="neutral"
+                            icon-name="utility:down"
+                            size="x-small"
+                            title="Move Down"
+                            onclick={handleMoveDown}
+                            disabled={isLastItem}>
+                        </lightning-button-icon>
+                    </div>
+                </template>
             </div>
             
             <!-- Icon -->

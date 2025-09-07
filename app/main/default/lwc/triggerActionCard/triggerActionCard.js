@@ -2,6 +2,9 @@ import { LightningElement, api } from 'lwc';
 
 export default class TriggerActionCard extends LightningElement {
     @api action;
+    @api isEditOrderMode = false;
+    @api isFirstItem = false;
+    @api isLastItem = false;
 
     connectedCallback() {
         console.log('=== TriggerActionCard connected ===');
@@ -57,6 +60,24 @@ export default class TriggerActionCard extends LightningElement {
                 }));
                 break;
         }
+    }
+
+    handleMoveUp() {
+        this.dispatchEvent(new CustomEvent('moveaction', {
+            detail: { 
+                actionId: this.action.Id,
+                direction: 'up'
+            }
+        }));
+    }
+
+    handleMoveDown() {
+        this.dispatchEvent(new CustomEvent('moveaction', {
+            detail: { 
+                actionId: this.action.Id,
+                direction: 'down'
+            }
+        }));
     }
 }
 
