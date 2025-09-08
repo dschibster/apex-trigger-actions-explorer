@@ -9,6 +9,7 @@ export default class TriggerActionModal extends LightningElement {
     @api triggerContext = ''; // 'CREATED', 'UPDATED', 'DELETED', 'RESTORED'
     @api selectedSettingId = ''; // The selected trigger setting ID
     @api selectedSettingDeveloperName = ''; // The selected trigger setting DeveloperName
+    @api selectedSettingObjectApiName = ''; // The selected trigger setting Object API Name
     
     @track actionData = {};
     @track originalData = {};
@@ -127,12 +128,30 @@ export default class TriggerActionModal extends LightningElement {
             if (this.actionData.Flow_Name__c) {
                 // Check if it's Flow (CDP) based on Apex Class Name
                 if (this.actionData.Apex_Class_Name__c === 'TriggerActionFlowChangeEvent') {
-                    this.selectedActionType = 'flow-cdp';
+                    // Only allow flow-cdp if the object supports Change Data Platform
+                    if (this.supportsChangeDataPlatform) {
+                        this.selectedActionType = 'flow-cdp';
+                    } else {
+                        // Fall back to regular flow if object doesn't support CDP
+                        this.selectedActionType = 'flow';
+                        this.actionData.Apex_Class_Name__c = 'TriggerActionFlow';
+                    }
                 } else if (this.actionData.Apex_Class_Name__c === 'TriggerActionFlow') {
-                    this.selectedActionType = 'flow';
+                    // If this is a regular flow but the object supports CDP, convert to Flow (CDP)
+                    if (this.supportsChangeDataPlatform) {
+                        this.selectedActionType = 'flow-cdp';
+                        this.actionData.Apex_Class_Name__c = 'TriggerActionFlowChangeEvent';
+                    } else {
+                        this.selectedActionType = 'flow';
+                    }
                 } else {
                     // Default to flow if Flow_Name__c is present but Apex_Class_Name__c is not set
-                    this.selectedActionType = 'flow';
+                    if (this.supportsChangeDataPlatform) {
+                        this.selectedActionType = 'flow-cdp';
+                        this.actionData.Apex_Class_Name__c = 'TriggerActionFlowChangeEvent';
+                    } else {
+                        this.selectedActionType = 'flow';
+                    }
                 }
             } else if (this.actionData.Apex_Class_Name__c) {
                 this.selectedActionType = 'apex';
@@ -235,6 +254,15 @@ export default class TriggerActionModal extends LightningElement {
             return 'Developer Name cannot be changed. To modify the Developer Name, please edit the record in the standard Salesforce setup page.';
         }
         return '';
+    }
+
+    get supportsChangeDataPlatform() {
+        if (!this.selectedSettingObjectApiName) {
+            return false;
+        }
+        
+        const objectName = this.selectedSettingObjectApiName;
+        return objectName.endsWith('ChangeEvent');
     }
 
     get buttonLabel() {

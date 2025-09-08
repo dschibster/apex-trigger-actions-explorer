@@ -52,21 +52,25 @@
                                                 data-type="apex"
                                                 class="slds-m-right_x-small">
                                             </lightning-button>
-                                            <lightning-button 
-                                                variant={flowButtonVariant}
-                                                icon-name="utility:flow"
-                                                label="Flow"
-                                                onclick={handleActionTypeChange}
-                                                data-type="flow"
-                                                class="slds-m-right_x-small">
-                                            </lightning-button>
-                                            <lightning-button 
-                                                variant={flowCdpButtonVariant}
-                                                icon-name="utility:flow"
-                                                label="Flow (CDP)"
-                                                onclick={handleActionTypeChange}
-                                                data-type="flow-cdp">
-                                            </lightning-button>
+                                            <template if:false={supportsChangeDataPlatform}>
+                                                <lightning-button 
+                                                    variant={flowButtonVariant}
+                                                    icon-name="utility:flow"
+                                                    label="Flow"
+                                                    onclick={handleActionTypeChange}
+                                                    data-type="flow"
+                                                    class="slds-m-right_x-small">
+                                                </lightning-button>
+                                            </template>
+                                            <template if:true={supportsChangeDataPlatform}>
+                                                <lightning-button 
+                                                    variant={flowCdpButtonVariant}
+                                                    icon-name="utility:flow"
+                                                    label="Flow (CDP)"
+                                                    onclick={handleActionTypeChange}
+                                                    data-type="flow-cdp">
+                                                </lightning-button>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
