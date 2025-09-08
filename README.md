@@ -6,11 +6,30 @@ A Salesforce Lightning Web Component application for managing trigger actions an
 
 Trigger Actions Explorer requires the latest version of the Trigger Actions Framework to be installed (as of now, Version 0.3.3). Other versions of the framework may work with the explorer, but it is not guaranteed.
 
-You can install the Trigger Actions Explorer in two ways:
 
-1. **Unlocked Package** (Recommended): Click the install button below to install the unlocked package directly into your Salesforce org.
+#### Production
+<div>
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tXX" target="_blank">
+  <img width="180" alt="Deploy to Salesforce"
+       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true">
+</a>
 
-   [![Install Unlocked Package](https://img.shields.io/badge/Install%20Unlocked%20Package-00A1E0?style=for-the-badge&logo=salesforce)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tXXXXXXXXXXXXXXX)
+<a href="https://githubsfdeploy.herokuapp.com">
+  <img width="180" alt="Deploy to Salesforce"
+       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unmanaged.png?raw=true">
+</a>
+</div>
+
+#### Sandbox
+
+<div>
+<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tXX" target="_blank">
+  <img width="180" alt="Deploy to Salesforce"
+       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true">
+</a>
+</div>
+
+1. **Unlocked Package** (Recommended): Click the install button above to install the unlocked package directly into your Salesforce org.
 
 2. **Manual Installation**: Copy the contents of this repository into your own Salesforce project and deploy using your preferred method (SFDX CLI, VS Code, etc.).
 

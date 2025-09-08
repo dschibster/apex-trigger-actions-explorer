@@ -48,8 +48,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   REPO_NAME: ${{ github.repository }}
               run: |
-                  chmod +x scripts/create-new-package-verison.sh
-                  ./scripts/create-new-package-verison.sh
+                  chmod +x scripts/create-new-package-version.sh
+                  ./scripts/create-new-package-version.sh
             - name: Promote current latest Package version
               if: github.ref == 'refs/heads/main' && github.actor == github.event.repository.owner.login
               run: |
