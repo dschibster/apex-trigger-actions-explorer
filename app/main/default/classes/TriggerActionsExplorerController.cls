@@ -345,4 +345,32 @@ public with sharing class TriggerActionsExplorerController {
         }
     }
     
+    /**
+     * Validates if a DeveloperName is unique for Trigger Actions
+     * @param developerName The DeveloperName to validate
+     * @return Boolean indicating if the DeveloperName is unique
+     */
+    @AuraEnabled
+    public static Boolean validateDeveloperNameUnique(String developerName) {
+        try {
+            if (String.isBlank(developerName)) {
+                return false;
+            }
+            
+            // Query for existing Trigger Action with this DeveloperName
+            List<Trigger_Action__mdt> existingActions = [
+                SELECT Id, DeveloperName 
+                FROM Trigger_Action__mdt 
+                WHERE DeveloperName = :developerName.trim()
+                LIMIT 1
+            ];
+            
+            return existingActions.isEmpty();
+            
+        } catch (Exception e) {
+            // If there's an error, assume it's not unique to be safe
+            return false;
+        }
+    }
+    
 }

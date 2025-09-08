@@ -20,6 +20,9 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track updatingSection = null; // Track which section is being updated
     @track error = null;
     
+    // Cache for DeveloperName validation
+    @track existingDeveloperNames = new Set();
+    
     // Modal properties
     @track isModalOpen = false;
     @track selectedAction = {};
@@ -142,6 +145,28 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         localStorage.removeItem('triggerActionsExplorer_selections');
     }
 
+    // Build cache of existing DeveloperNames for duplicate validation
+    buildDeveloperNameCache() {
+        this.existingDeveloperNames.clear();
+        this.triggerActions.forEach(action => {
+            if (action.DeveloperName) {
+                this.existingDeveloperNames.add(action.DeveloperName);
+            }
+        });
+    }
+
+    // Getter to provide DeveloperName cache as array for modal
+    get developerNameCache() {
+        return Array.from(this.existingDeveloperNames);
+    }
+
+    // Add a new DeveloperName to the cache (called after successful creation)
+    addDeveloperNameToCache(developerName) {
+        if (developerName) {
+            this.existingDeveloperNames.add(developerName);
+        }
+    }
+
     // Restore user selections from localStorage (only after deployment)
     restoreUserSelections() {
         try {
@@ -188,6 +213,9 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             
             this.triggerSettings = settings || [];
             this.triggerActions = actions || [];
+            
+            // Build DeveloperName cache for duplicate validation
+            this.buildDeveloperNameCache();
             
             // Restore user selections from localStorage after data is loaded
             this.restoreUserSelections();
@@ -550,39 +578,29 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             // Save current user selections before deployment
             this.saveUserSelections();
             
-            if (mode === 'create') {
-                console.log('Creating new action:', actionData);
-            } else {
-                console.log('Updating action:', actionId, actionData);
-            }
-            
             // Call the upsert method with the action data
             const jobId = await upsertTriggerAction({ actionData: JSON.stringify(actionData) });
             
-            console.log('Deployment initiated, job ID:', jobId);
-            
-            // Keep modal open and show loading spinner during deployment
-            console.log('Deployment initiated, keeping modal open with loading spinner');
-            console.log('Waiting for platform event callback...');
+            // If this is a creation, add the DeveloperName to cache immediately
+            if (mode === 'create' && actionData.DeveloperName) {
+                this.addDeveloperNameToCache(actionData.DeveloperName);
+            }
             
             // The modal will stay open with loading spinner until the platform event callback
             // handles the deployment completion and refreshes the data
             
         } catch (error) {
-            console.error('Error processing trigger action:', error);
             const errorMessage = error.body?.message || error.message || 'Failed to process trigger action';
             
             // Check if this is a pre-deployment error that might still trigger a platform event
             // In that case, we should wait for the platform event instead of showing the error immediately
             if (errorMessage.includes('Error upserting trigger action')) {
-                console.log('Pre-deployment error detected, waiting for platform event callback...');
                 // Keep the loading state and wait for platform event
                 // The platform event will handle showing the error message
                 
                 // Set a timeout to show the error if platform event doesn't arrive within 10 seconds
                 setTimeout(() => {
                     if (this.isUpdating) {
-                        console.log('Platform event timeout, showing original error message');
                         this.showToast('Error', errorMessage, 'error');
                         this.isUpdating = false;
                     }
@@ -645,7 +663,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 // Set a timeout to show the error if platform event doesn't arrive within 10 seconds
                 setTimeout(() => {
                     if (this.isUpdating) {
-                        console.log('Platform event timeout, showing original error message');
                         this.showToast('Error', errorMessage, 'error');
                         this.isUpdating = false;
                     }

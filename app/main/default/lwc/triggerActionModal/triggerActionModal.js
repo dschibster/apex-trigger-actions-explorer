@@ -1,4 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
+import validateDeveloperNameUnique from '@salesforce/apex/TriggerActionsExplorerController.validateDeveloperNameUnique';
 
 export default class TriggerActionModal extends LightningElement {
     @api isOpen = false;
@@ -10,6 +11,7 @@ export default class TriggerActionModal extends LightningElement {
     @api selectedSettingId = ''; // The selected trigger setting ID
     @api selectedSettingDeveloperName = ''; // The selected trigger setting DeveloperName
     @api selectedSettingObjectApiName = ''; // The selected trigger setting Object API Name
+    @api existingDeveloperNames = []; // Cache of existing DeveloperNames for duplicate validation
     
     @track actionData = {};
     @track originalData = {};
@@ -341,7 +343,7 @@ export default class TriggerActionModal extends LightningElement {
         }));
     }
 
-    handleUpdate() {
+    async handleUpdate() {
         // Clear any previous errors
         this.modalError = null;
         
@@ -349,6 +351,24 @@ export default class TriggerActionModal extends LightningElement {
         if (this.mode === 'create') {
             if (!this.actionData.DeveloperName?.trim() || !this.actionData.Label?.trim() || !this.actionData.Description__c?.trim()) {
                 this.modalError = 'Developer Name, Label, and Description are required fields.';
+                return;
+            }
+            
+            // Check for duplicate DeveloperName (frontend cache check)
+            if (this.existingDeveloperNames.includes(this.actionData.DeveloperName.trim())) {
+                this.modalError = 'Developer Name already exists. Please choose a different name.';
+                return;
+            }
+            
+            // Additional server-side validation for DeveloperName uniqueness
+            try {
+                const isUnique = await validateDeveloperNameUnique({ developerName: this.actionData.DeveloperName.trim() });
+                if (!isUnique) {
+                    this.modalError = 'Developer Name already exists. Please choose a different name.';
+                    return;
+                }
+            } catch (error) {
+                this.modalError = 'Error validating Developer Name. Please try again.';
                 return;
             }
         } else if (this.mode === 'edit') {
