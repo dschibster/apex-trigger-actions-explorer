@@ -51,6 +51,10 @@
                             </a>
                             <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
                             <span class="slds-text-color_weak slds-text-body_small">{actionType}</span>
+                            <template if:true={classOrFlowName}>
+                                <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
+                                <span class="slds-text-color_weak slds-text-body_small">{classOrFlowName}</span>
+                            </template>
                         </div>
                     </div>
                     <p class="slds-text-body_small slds-text-color_weak slds-truncate">{action.Description__c}</p>

@@ -35,6 +35,10 @@ export default class TriggerActionCard extends LightningElement {
         return this.action?.Flow_Name__c ? 'Flow' : 'Apex';
     }
 
+    get classOrFlowName() {
+        return this.action?.Flow_Name__c || this.action?.Apex_Class_Name__c || '';
+    }
+
     get metadataUrl() {
         // Create URL to the custom metadata record
         const baseUrl = window.location.origin;
