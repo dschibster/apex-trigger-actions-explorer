@@ -77,6 +77,54 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         this.unsubscribeFromPlatformEvent();
     }
 
+    // Save user selections to localStorage (only called before deployment)
+    saveUserSelections() {
+        const selections = {
+            selectedSetting: this.selectedSetting,
+            selectedContext: this.selectedContext,
+            selectedTiming: this.selectedTiming,
+            timestamp: Date.now() // Add timestamp to track when saved
+        };
+        localStorage.setItem('triggerActionsExplorer_selections', JSON.stringify(selections));
+    }
+
+    // Clear saved selections from localStorage
+    clearSavedSelections() {
+        localStorage.removeItem('triggerActionsExplorer_selections');
+    }
+
+    // Restore user selections from localStorage (only after deployment)
+    restoreUserSelections() {
+        try {
+            const savedSelections = localStorage.getItem('triggerActionsExplorer_selections');
+            if (savedSelections) {
+                const selections = JSON.parse(savedSelections);
+                
+                // Only restore if the setting still exists
+                if (selections.selectedSetting && this.triggerSettings.find(s => s.Id === selections.selectedSetting)) {
+                    this.selectedSetting = selections.selectedSetting;
+                    const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+                    this.selectedSettingDeveloperName = setting ? setting.DeveloperName : '';
+                }
+                
+                // Only restore if the context is still valid
+                if (selections.selectedContext && this.contextOptions.find(c => c.value === selections.selectedContext)) {
+                    this.selectedContext = selections.selectedContext;
+                }
+                
+                // Only restore if the timing is still valid
+                if (selections.selectedTiming && this.timingOptions.find(t => t.value === selections.selectedTiming)) {
+                    this.selectedTiming = selections.selectedTiming;
+                }
+                
+                // Clear the saved selections after restoring them
+                this.clearSavedSelections();
+            }
+        } catch (error) {
+            console.warn('Failed to restore user selections:', error);
+        }
+    }
+
     async loadData() {
         try {
             this.isLoading = true;
@@ -100,8 +148,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             });
             console.log('First action data:', this.triggerActions[0] ? JSON.stringify(this.triggerActions[0], null, 2) : 'No actions');
             
-            // Set default selection if data is available
-            if (this.triggerSettings.length > 0) {
+            // Restore user selections from localStorage after data is loaded
+            this.restoreUserSelections();
+            
+            // Set default selection if data is available and no selections were restored
+            if (this.triggerSettings.length > 0 && !this.selectedSetting) {
                 this.selectedSetting = this.triggerSettings[0].Id;
                 this.selectedSettingDeveloperName = this.triggerSettings[0].DeveloperName;
                 this.selectedContext = this.contextOptions[0].value;
@@ -454,6 +505,9 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.isUpdating = true;
             // Don't clear the main error here - keep it separate from modal errors
             
+            // Save current user selections before deployment
+            this.saveUserSelections();
+            
             if (mode === 'create') {
                 console.log('Creating new action:', actionData);
             } else {
@@ -516,6 +570,9 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         
         try {
             this.isUpdating = true;
+            
+            // Save current user selections before deployment
+            this.saveUserSelections();
             
             if (mode === 'create') {
                 console.log('Creating new setting:', settingData);
