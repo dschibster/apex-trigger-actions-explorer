@@ -15,6 +15,26 @@ export default class TriggerSettingModal extends LightningElement {
 
     connectedCallback() {
         this.initializeData();
+        
+        // Add document-level keyboard event listener for Esc key
+        this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+        document.addEventListener('keydown', this.boundHandleKeyDown);
+    }
+
+    disconnectedCallback() {
+        // Remove document-level keyboard event listener when component is disconnected
+        if (this.boundHandleKeyDown) {
+            document.removeEventListener('keydown', this.boundHandleKeyDown);
+        }
+    }
+
+    // Handle keyboard events
+    handleKeyDown(event) {
+        // Close modal when Esc key is pressed and modal is open
+        if (event.key === 'Escape' && this.isOpen) {
+            event.preventDefault();
+            this.handleClose();
+        }
     }
 
     renderedCallback() {
