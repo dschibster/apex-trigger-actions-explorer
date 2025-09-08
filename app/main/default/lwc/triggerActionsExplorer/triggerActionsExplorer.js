@@ -218,7 +218,9 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 
                 const actionObj = {
                     Id: action.Id,
-                    Name: action.DeveloperName,
+                    DeveloperName: action.DeveloperName,
+                    Label: action.Label || action.DeveloperName,
+                    Name: action.Label || action.DeveloperName,
                     Description__c: action.Description__c || 'No description provided',
                     Order__c: action.Order__c || 0,
                     Apex_Class_Name__c: action.Apex_Class_Name__c || null,
@@ -243,7 +245,9 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 
                 const actionObj = {
                     Id: action.Id,
-                    Name: action.DeveloperName,
+                    DeveloperName: action.DeveloperName,
+                    Label: action.Label || action.DeveloperName,
+                    Name: action.Label || action.DeveloperName,
                     Description__c: action.Description__c || 'No description provided',
                     Order__c: action.Order__c || 0,
                     Apex_Class_Name__c: action.Apex_Class_Name__c || null,

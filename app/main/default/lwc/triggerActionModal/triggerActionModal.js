@@ -115,6 +115,14 @@ export default class TriggerActionModal extends LightningElement {
             this.actionData = JSON.parse(JSON.stringify(this.action));
             this.originalData = JSON.parse(JSON.stringify(this.action));
             
+            // Debug logging to see what data we're receiving
+            console.log('=== MODAL: Action data received ===');
+            console.log('Action:', this.action);
+            console.log('ActionData:', this.actionData);
+            console.log('Label field:', this.actionData.Label);
+            console.log('DeveloperName field:', this.actionData.DeveloperName);
+            console.log('=== END MODAL: Action data ===');
+            
             // Set action type based on existing data
             if (this.actionData.Flow_Name__c) {
                 // Check if it's Flow (CDP) based on Apex Class Name
@@ -212,6 +220,21 @@ export default class TriggerActionModal extends LightningElement {
 
     get isCreateMode() {
         return this.mode === 'create';
+    }
+
+    get isViewMode() {
+        return this.mode === 'view';
+    }
+
+    get isDeveloperNameReadOnly() {
+        return this.mode === 'edit' || this.mode === 'view';
+    }
+
+    get developerNameTooltip() {
+        if (this.mode === 'edit' || this.mode === 'view') {
+            return 'Developer Name cannot be changed. To modify the Developer Name, please edit the record in the standard Salesforce setup page.';
+        }
+        return '';
     }
 
     get buttonLabel() {

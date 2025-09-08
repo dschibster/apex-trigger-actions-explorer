@@ -18,12 +18,8 @@ export default class TriggerActionCard extends LightningElement {
     }
 
     get displayName() {
-        if (this.action?.Flow_Name__c) {
-            return this.action.Flow_Name__c;
-        } else if (this.action?.Apex_Class_Name__c) {
-            return this.action.Apex_Class_Name__c;
-        }
-        return 'Unnamed Action';
+        // Use the Name field which contains the MasterLabel
+        return this.action?.Name || 'Unnamed Action';
     }
 
 

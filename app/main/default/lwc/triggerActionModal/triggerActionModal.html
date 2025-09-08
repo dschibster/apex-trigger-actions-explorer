@@ -99,48 +99,28 @@
                             </lightning-layout-item>
                         </template>
                         
-                        <!-- Row 3: Developer Name and Label (for creation mode) -->
-                        <template if:true={isCreateMode}>
-                            <lightning-layout-item size="6" padding="around-small">
-                                <lightning-input 
-                                    label="Developer Name" 
-                                    value={actionData.DeveloperName}
-                                    onchange={handleFieldChange}
-                                    data-field="DeveloperName"
-                                    required>
-                                </lightning-input>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="6" padding="around-small">
-                                <lightning-input 
-                                    label="Label" 
-                                    value={actionData.Label}
-                                    onchange={handleFieldChange}
-                                    data-field="Label"
-                                    required>
-                                </lightning-input>
-                            </lightning-layout-item>
-                        </template>
-                        
-                        <!-- Row 3: Developer Name and Label (for edit mode) -->
-                        <template if:true={isEditMode}>
-                            <lightning-layout-item size="6" padding="around-small">
-                                <lightning-input 
-                                    label="Developer Name" 
-                                    value={actionData.DeveloperName}
-                                    disabled
-                                    title="Developer Name cannot be changed. To modify the Developer Name, please edit the record in the standard Salesforce setup page.">
-                                </lightning-input>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="6" padding="around-small">
-                                <lightning-input 
-                                    label="Label" 
-                                    value={actionData.Label}
-                                    onchange={handleFieldChange}
-                                    data-field="Label"
-                                    required>
-                                </lightning-input>
-                            </lightning-layout-item>
-                        </template>
+                        <!-- Row 3: Developer Name and Label -->
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input 
+                                label="Developer Name" 
+                                value={actionData.DeveloperName}
+                                onchange={handleFieldChange}
+                                data-field="DeveloperName"
+                                disabled={isDeveloperNameReadOnly}
+                                title={developerNameTooltip}
+                                required={isCreateMode}>
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input 
+                                label="Label" 
+                                value={actionData.Label}
+                                onchange={handleFieldChange}
+                                data-field="Label"
+                                disabled={isReadOnly}
+                                required={isCreateMode}>
+                            </lightning-input>
+                        </lightning-layout-item>
                         
                         <!-- Row 4: Description (full width) -->
                         <lightning-layout-item size="12" padding="around-small">
