@@ -33,6 +33,8 @@ Trigger Actions Explorer requires the latest version of the Trigger Actions Fram
 
 2. **Manual Installation**: Copy the contents of this repository into your own Salesforce project and deploy using your preferred method (SFDX CLI, VS Code, etc.).
 
+After installation, assign yourself the "Trigger Actions Explorer" Permission Set and you will be able to navigate to the explorer via the Tab with the same name.
+
 ## Key Features
 
 * Manage trigger actions with the same intuitive workflow as Flow Trigger Explorer
@@ -44,9 +46,20 @@ Trigger Actions Explorer requires the latest version of the Trigger Actions Fram
 
 ## Screenshots
 
-*[Screenshot: Main interface showing object selector and trigger action sections]*
-*[Screenshot: Edit order mode with manual decimal entry (1.5, 2.25, 3.75)]*
-*[Screenshot: Create/edit action modal with Flow (CDP) option]*
+![Main Explorer View](https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/screen_explorer_view.png?raw=true)
+*Main interface showing object selector and trigger action sections*
+
+![Create SObject Trigger Setting](https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/screen_object_creation.png?raw=true)
+*Create SObject Trigger Setting modal for configuring object-specific trigger behavior*
+
+![Create Action Modal](https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/screen_create_action.png?raw=true)
+*Create/edit action modal with Apex and Flow options*
+
+![Reorder with Arrows](https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/screen_reorder_arrows.png?raw=true)
+*Edit order mode with up/down arrow controls*
+
+![Manual Order Entry](https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/screen_reorder_manual.png?raw=true)
+*Edit order mode with manual decimal entry (1.5, 2.25, 3.75)*
 
 ## Technical Limitations
 
