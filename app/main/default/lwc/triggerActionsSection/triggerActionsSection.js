@@ -97,7 +97,7 @@ export default class TriggerActionsSection extends LightningElement {
             // Calculate new order values based on current position
             updatedActions = this.actions.map((action, index) => ({
                 ...action,
-                Order__c: (index + 1) * 0.0001 // Use small increments for ordering
+                Order__c: index + 1 // Use integers for repositioning mode
             }));
         }
 
