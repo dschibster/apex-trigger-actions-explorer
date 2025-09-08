@@ -181,6 +181,11 @@ export default class TriggerSettingModal extends LightningElement {
                     jobId: jobId
                 }
             }));
+
+            // Clear form data after successful creation
+            if (this.mode === 'create') {
+                this.clearFormData();
+            }
             
         } catch (error) {
             console.error('Error processing trigger setting:', error);
@@ -188,6 +193,14 @@ export default class TriggerSettingModal extends LightningElement {
             this.modalError = errorMessage;
             this.isUpdating = false;
         }
+    }
+
+    clearFormData() {
+        // Clear all form data for fresh creation
+        this.settingData = {};
+        this.originalData = {};
+        this._isCreateDataInitialized = false;
+        this.modalError = null;
     }
 
     handleClose() {

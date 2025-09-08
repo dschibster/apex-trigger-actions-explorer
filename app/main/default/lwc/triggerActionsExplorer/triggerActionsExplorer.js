@@ -484,7 +484,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
 
     get triggerSettingsOptions() {
         const options = this.triggerSettings.map(setting => ({
-            label: setting.Object_API_Name__c,
+            label: setting.Label || setting.Object_API_Name__c,
             value: setting.Id
         }));
         return options;

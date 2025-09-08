@@ -6,7 +6,7 @@ public with sharing class TriggerActionsExplorerController {
             // Query actual SObject Trigger Settings from custom metadata
             // Note: Bypass_Execution__c = false means the trigger is ACTIVE
             List<sObject_Trigger_Setting__mdt> settings = [
-                SELECT Id, DeveloperName, Object_API_Name__c, Bypass_Execution__c, Bypass_Permission__c, Required_Permission__c
+                SELECT Id, DeveloperName, Label, Object_API_Name__c, Bypass_Execution__c, Bypass_Permission__c, Required_Permission__c
                 FROM sObject_Trigger_Setting__mdt
                 ORDER BY Object_API_Name__c ASC
             ];
