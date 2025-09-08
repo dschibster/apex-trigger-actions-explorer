@@ -1,12 +1,25 @@
 {
   "packageDirectories": [
     {
+      "versionName": "Trigger Actions Explorer v0.1",
+      "versionNumber": "0.1.0.NEXT",
       "path": "app",
-      "default": true
+      "default": true,
+      "package": "apex-trigger-actions-explorer",
+      "versionDescription": "Trigger Actions Explorer",
+      "dependencies":[
+        {
+          "package": "apex-trigger-actions-framework"
+        }
+      ]
     }
   ],
   "name": "trigger-actions-explorer",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "64.0"
+  "sourceApiVersion": "64.0",
+  "packageAliases": {
+    "apex-trigger-actions-explorer": "0HoJ8000000k9cfKAA",
+    "apex-trigger-actions-framework": "04tKY000000QQ0RYAW"
+  }
 }

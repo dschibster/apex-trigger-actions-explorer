@@ -4,6 +4,8 @@ A Salesforce Lightning Web Component application for managing trigger actions an
 
 ## Installation
 
+Trigger Actions Explorer requires the latest version of the Trigger Actions Framework to be installed (as of now, Version 0.3.3). Other versions of the framework may work with the explorer, but it is not guaranteed.
+
 You can install the Trigger Actions Explorer in two ways:
 
 1. **Unlocked Package** (Recommended): Click the install button below to install the unlocked package directly into your Salesforce org.
