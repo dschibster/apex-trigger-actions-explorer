@@ -335,18 +335,22 @@ export default class TriggerActionModal extends LightningElement {
             this.actionData = {
                 ...this.actionData,
                 Apex_Class_Name__c: 'TriggerActionFlow',
+                Flow_Name__c: null, // Clear Flow Name when switching to regular Flow
                 Allow_Flow_Recursion__c: false
             };
         } else if (actionType === 'flow-cdp') {
             this.actionData = {
                 ...this.actionData,
                 Apex_Class_Name__c: 'TriggerActionFlowChangeEvent',
+                Flow_Name__c: null, // Clear Flow Name when switching to Flow CDP
                 Allow_Flow_Recursion__c: false
             };
         } else if (actionType === 'apex') {
             this.actionData = {
                 ...this.actionData,
-                Flow_Name__c: ''
+                Apex_Class_Name__c: null, // Clear Apex Class Name when switching to Apex
+                Flow_Name__c: null,
+                Allow_Flow_Recursion__c: null
             };
         }
         
