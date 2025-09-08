@@ -1,6 +1,6 @@
 # Trigger Actions Explorer
 
-A Salesforce Lightning Web Component application for managing trigger actions and their execution order across different objects and contexts.
+A Salesforce Lightning Web Component application for managing trigger actions in Mitch Spano's [Trigger Actions Framework](https://github.com/mitchspano/trigger-actions-framework/tree/main) and their execution order across different objects and contexts.
 
 ## Installation
 
