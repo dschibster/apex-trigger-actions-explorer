@@ -67,7 +67,7 @@ DeveloperName editing and deletions are not yet supported by the Apex Metadata A
 
 ## Support
 
-Feel free to create issues or pull requests with suggested fixes or problems. We welcome contributions and feedback to improve the application.
+Feel free to create issues or pull requests with suggested fixes or problems. I welcome contributions and feedback to improve the application.
 
 ## Disclaimer
 
