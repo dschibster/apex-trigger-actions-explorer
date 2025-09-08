@@ -326,4 +326,76 @@ public with sharing class TriggerActionsExplorerController {
         }
     }
     
+    /**
+     * Updates the order of multiple trigger actions using the Metadata API
+     * @param actionsData JSON string containing array of action data with updated order values
+     * @return String containing the deployment job ID
+     */
+    @AuraEnabled
+    public static String updateTriggerActionsOrder(String actionsData) {
+        try {
+            System.debug('updateTriggerActionsOrder called with data: ' + actionsData);
+            
+            // Parse the actions data
+            List<Object> actionsList = (List<Object>) JSON.deserializeUntyped(actionsData);
+            System.debug('Parsed actions list size: ' + actionsList.size());
+            
+            // Create metadata container for batch update
+            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+            
+            // Process each action
+            for (Object actionObj : actionsList) {
+                Map<String, Object> actionMap = (Map<String, Object>) actionObj;
+                
+                String developerName = (String) actionMap.get('DeveloperName');
+                Decimal orderValue = (Decimal) actionMap.get('Order__c');
+                
+                System.debug('Processing action: ' + developerName + ' with order: ' + orderValue);
+                
+                // Create custom metadata instance
+                Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
+                customMetadata.fullName = 'Trigger_Action__mdt.' + developerName;
+                customMetadata.label = (String) actionMap.get('Label') != null ? (String) actionMap.get('Label') : developerName;
+                
+                // Add Order field
+                Metadata.CustomMetadataValue orderField = new Metadata.CustomMetadataValue();
+                orderField.field = 'Order__c';
+                orderField.value = orderValue;
+                customMetadata.values.add(orderField);
+                
+                // Add to deployment container
+                mdContainer.addMetadata(customMetadata);
+            }
+            
+            System.debug('Created deployment container with ' + mdContainer.getMetadata().size() + ' metadata items');
+            
+            // Create callback and deploy
+            Metadata.DeployCallback callback = new TriggerActionDeployCallback();
+            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
+            System.debug('Mass update deployment initiated with job ID: ' + jobId);
+            
+            return String.valueOf(jobId);
+            
+        } catch (Exception e) {
+            System.debug('Error updating trigger actions order: ' + e.getMessage());
+            System.debug('Exception type: ' + e.getTypeName());
+            System.debug('Exception stack trace: ' + e.getStackTraceString());
+            
+            // Publish platform event for error handling
+            try {
+                String currentUserId = UserInfo.getUserId();
+                TriggerActionsExplorerCallback__e callbackEvent = new TriggerActionsExplorerCallback__e();
+                callbackEvent.UserId__c = currentUserId;
+                callbackEvent.Status__c = 'failed';
+                callbackEvent.Message__c = 'Error updating trigger actions order: ' + e.getMessage();
+                EventBus.publish(callbackEvent);
+                System.debug('Published error platform event for mass update');
+            } catch (Exception eventException) {
+                System.debug('Error publishing platform event: ' + eventException.getMessage());
+            }
+            
+            throw new AuraHandledException('Error updating trigger actions order: ' + e.getMessage());
+        }
+    }
+    
 }

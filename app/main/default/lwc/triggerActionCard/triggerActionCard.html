@@ -4,7 +4,7 @@
             <!-- Order Number -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <template if:false={isEditOrderMode}>
-                    <span class="slds-text-heading_small slds-text-color_weak">{action.Order__c}</span>
+                    <span class="slds-text-heading_small slds-text-color_weak">{displayOrder}</span>
                 </template>
                 <template if:true={isEditOrderMode}>
                     <div class="slds-grid slds-grid_vertical slds-grid_align-center">

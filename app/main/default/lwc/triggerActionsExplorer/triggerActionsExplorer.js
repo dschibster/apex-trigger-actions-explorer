@@ -5,6 +5,7 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import getTriggerSettings from '@salesforce/apex/TriggerActionsExplorerController.getTriggerSettings';
 import getTriggerActions from '@salesforce/apex/TriggerActionsExplorerController.getTriggerActions';
 import upsertTriggerAction from '@salesforce/apex/TriggerActionsExplorerController.upsertTriggerAction';
+import updateTriggerActionsOrder from '@salesforce/apex/TriggerActionsExplorerController.updateTriggerActionsOrder';
 import getCurrentUserId from '@salesforce/apex/TriggerActionsExplorerController.getCurrentUserId';
 
 export default class TriggerActionsExplorer extends NavigationMixin(LightningElement) {
@@ -16,6 +17,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     @track selectedSettingDeveloperName = '';
     @track isLoading = false;
     @track isUpdating = false;
+    @track updatingSection = null; // Track which section is being updated
     @track error = null;
     
     // Modal properties
@@ -1012,6 +1014,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         
         // Reset updating state
         this.isUpdating = false;
+        this.updatingSection = null;
     }
 
     // Handle entering edit mode - exit other sections
@@ -1035,8 +1038,29 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         
         try {
             this.isUpdating = true;
+            this.updatingSection = sectionTitle; // Track which section is being updated
             
-            // For now, just update the local arrays (frontend only as requested)
+            // Save current user selections before deployment
+            this.saveUserSelections();
+            
+            // Prepare actions data for mass update with full integer enumeration
+            const actionsToUpdate = updatedActions.map((action, index) => ({
+                DeveloperName: action.DeveloperName,
+                Label: action.Label || action.DeveloperName,
+                Order__c: parseInt(index + 1, 10) // Ensure full integer, order starts from 1
+            }));
+            
+            console.log('Prepared actions for mass update with full integer enumeration:');
+            actionsToUpdate.forEach((action, index) => {
+                console.log(`  ${index + 1}. ${action.DeveloperName} -> Order: ${action.Order__c} (type: ${typeof action.Order__c})`);
+            });
+            
+            // Call the mass update Apex method
+            const jobId = await updateTriggerActionsOrder({ actionsData: JSON.stringify(actionsToUpdate) });
+            
+            console.log('Mass update deployment initiated, job ID:', jobId);
+            
+            // Update local arrays immediately for better UX
             if (sectionTitle === 'Before Actions') {
                 this.beforeActions = updatedActions;
             } else if (sectionTitle === 'After Actions') {
@@ -1047,14 +1071,17 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.beforeActions = [...this.beforeActions];
             this.afterActions = [...this.afterActions];
             
-            console.log('Order updated successfully');
-            this.showToast('Success', 'Order updated successfully', 'success');
+            console.log('Order update initiated successfully');
+            this.showToast('Success', 'Order update initiated. Changes will be applied shortly.', 'success');
+            
+            // Don't reset isUpdating here - let the deployment callback handle it
+            // The spinner will continue until the platform event callback completes
             
         } catch (error) {
             console.error('Error updating order:', error);
-            this.showToast('Error', 'Failed to update order', 'error');
-        } finally {
-            this.isUpdating = false;
+            this.showToast('Error', 'Failed to update order: ' + (error.body?.message || error.message), 'error');
+            this.isUpdating = false; // Reset on error
+            this.updatingSection = null; // Reset updating section on error
         }
     }
 

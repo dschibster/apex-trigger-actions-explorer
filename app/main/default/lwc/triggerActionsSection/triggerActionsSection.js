@@ -3,10 +3,16 @@ import { LightningElement, api, track } from 'lwc';
 export default class TriggerActionsSection extends LightningElement {
     @api title;
     @api actions;
+    @api isUpdating = false;
+    @api updatingSection = null;
     
     @track isExpanded = true;
     @track isEditOrderMode = false;
     @track originalActions = []; // Store original order for cancel
+
+    get isThisSectionUpdating() {
+        return this.isUpdating && this.updatingSection === this.title;
+    }
 
     connectedCallback() {
         console.log('=== TriggerActionsSection connected ===');

@@ -5,6 +5,7 @@ export default class TriggerActionCard extends LightningElement {
     @api isEditOrderMode = false;
     @api isFirstItem = false;
     @api isLastItem = false;
+    @api visualOrder = null; // Visual position in the list (1, 2, 3...)
 
     connectedCallback() {
         console.log('=== TriggerActionCard connected ===');
@@ -20,6 +21,11 @@ export default class TriggerActionCard extends LightningElement {
     get displayName() {
         // Use the Name field which contains the MasterLabel
         return this.action?.Name || 'Unnamed Action';
+    }
+
+    get displayOrder() {
+        // Show visual order if available (add 1 since arrays are 0-based), otherwise fall back to database order
+        return this.visualOrder !== null ? (this.visualOrder + 1) : (this.action?.Order__c || 0);
     }
 
 

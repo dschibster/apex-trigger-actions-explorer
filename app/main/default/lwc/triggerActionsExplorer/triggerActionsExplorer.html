@@ -20,6 +20,7 @@
             </div>
         </template>
 
+
         <!-- Error Display -->
         <template if:true={error}>
             <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
@@ -119,6 +120,8 @@
                                             <c-trigger-actions-section 
                                                 title="Before Actions" 
                                                 actions={beforeActions} 
+                                                is-updating={isUpdating}
+                                                updating-section={updatingSection}
                                                 onview={handleViewAction}
                                                 onedit={handleEditAction} 
                                                 onaddaction={handleAddAction}
@@ -133,6 +136,8 @@
                                             <c-trigger-actions-section 
                                                 title="After Actions" 
                                                 actions={afterActions} 
+                                                is-updating={isUpdating}
+                                                updating-section={updatingSection}
                                                 onview={handleViewAction}
                                                 onedit={handleEditAction} 
                                                 onaddaction={handleAddAction}
