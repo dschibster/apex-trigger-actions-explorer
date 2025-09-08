@@ -3,7 +3,6 @@ public with sharing class TriggerActionsExplorerController {
     @AuraEnabled(cacheable=false)
     public static List<sObject_Trigger_Setting__mdt> getTriggerSettings(String timestamp) {
         try {
-            System.debug('getTriggerSettings called with timestamp: ' + timestamp);
             // Query actual SObject Trigger Settings from custom metadata
             // Note: Bypass_Execution__c = false means the trigger is ACTIVE
             List<sObject_Trigger_Setting__mdt> settings = [
@@ -12,10 +11,8 @@ public with sharing class TriggerActionsExplorerController {
                 ORDER BY Object_API_Name__c ASC
             ];
             
-            System.debug('Retrieved trigger settings: ' + settings.size());
             return settings;
         } catch (Exception e) {
-            System.debug('Error retrieving trigger settings: ' + e.getMessage());
             throw new AuraHandledException('Error retrieving trigger settings: ' + e.getMessage());
         }
     }
@@ -96,16 +93,10 @@ public with sharing class TriggerActionsExplorerController {
             Metadata.DeployCallback callback = new TriggerActionDeployCallback();
             Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
             
-            System.debug('Trigger Action upsert deployment job ID: ' + jobId);
-            System.debug('Deployment initiated for: ' + developerName);
-            System.debug('Custom metadata values: ' + customMetadata.values);
             
             return String.valueOf(jobId);
             
         } catch (Exception e) {
-            System.debug('Error upserting trigger action: ' + e.getMessage());
-            System.debug('Exception type: ' + e.getTypeName());
-            System.debug('Exception stack trace: ' + e.getStackTraceString());
             
             // For validation errors or other pre-deployment issues, we should still try to publish a platform event
             // to provide consistent error handling to the frontend
@@ -120,16 +111,12 @@ public with sharing class TriggerActionsExplorerController {
                     errorMessage = errorMessage.substring(0, 252) + '...';
                 }
                 callbackEvent.Message__c = errorMessage;
-                System.debug('Publishing pre-deployment error platform event with message: ' + errorMessage);
                 
                 Database.SaveResult publishResult = EventBus.publish(callbackEvent);
                 if (publishResult.isSuccess()) {
-                    System.debug('Platform event published for pre-deployment error');
                 } else {
-                    System.debug('Failed to publish platform event for pre-deployment error: ' + publishResult.getErrors());
                 }
             } catch (Exception publishException) {
-                System.debug('Error publishing platform event for pre-deployment error: ' + publishException.getMessage());
             }
             
             throw new AuraHandledException('Error upserting trigger action: ' + e.getMessage());
@@ -144,16 +131,13 @@ public with sharing class TriggerActionsExplorerController {
     @AuraEnabled
     public static String upsertTriggerSetting(String settingDataJson) {
         try {
-            System.debug('Received settingDataJson: ' + settingDataJson);
             
             Map<String, Object> settingMap = (Map<String, Object>) JSON.deserializeUntyped(settingDataJson);
-            System.debug('Deserialized settingMap: ' + settingMap);
             
             // Extract required fields
             String developerName = (String) settingMap.get('DeveloperName');
             String label = (String) settingMap.get('Label');
             
-            System.debug('DeveloperName: ' + developerName + ', Label: ' + label);
             
             // DeveloperName is always required
             if (String.isBlank(developerName)) {
@@ -163,7 +147,6 @@ public with sharing class TriggerActionsExplorerController {
             // Label is only required for new records (when it's provided and not blank)
             // For updates, we might not have the label in the data
             if (String.isBlank(label)) {
-                System.debug('Label is blank, this might be an update operation');
                 // For updates, we'll use the DeveloperName as the label if no label is provided
                 label = developerName;
             }
@@ -174,7 +157,6 @@ public with sharing class TriggerActionsExplorerController {
             customMetadata.label = label;
             
             // Add field values
-            System.debug('Adding field values...');
             addFieldValue(customMetadata, 'Object_API_Name__c', (String) settingMap.get('Object_API_Name__c'));
             addFieldValue(customMetadata, 'Object_Namespace__c', (String) settingMap.get('Object_Namespace__c'));
             addFieldValue(customMetadata, 'TriggerRecord_Class_Name__c', (String) settingMap.get('TriggerRecord_Class_Name__c'));
@@ -182,43 +164,26 @@ public with sharing class TriggerActionsExplorerController {
             addFieldValue(customMetadata, 'Bypass_Permission__c', (String) settingMap.get('Bypass_Permission__c'));
             
             // Add boolean fields
-            System.debug('Adding boolean field values...');
             try {
                 Object bypassExecutionValue = settingMap.get('Bypass_Execution__c');
-                System.debug('Bypass_Execution__c value from map: ' + bypassExecutionValue);
                 addBooleanFieldValue(customMetadata, 'Bypass_Execution__c', bypassExecutionValue);
-                System.debug('Successfully added Bypass_Execution__c field');
             } catch (Exception booleanException) {
-                System.debug('Error adding boolean field: ' + booleanException.getMessage());
-                System.debug('Boolean field exception stack trace: ' + booleanException.getStackTraceString());
                 throw new AuraHandledException('Error processing boolean field: ' + booleanException.getMessage());
             }
             
-            System.debug('Custom metadata created: ' + customMetadata);
-            System.debug('Number of field values: ' + customMetadata.values.size());
             
             // Deploy the metadata
-            System.debug('Creating deployment container...');
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(customMetadata);
-            System.debug('Added metadata to container');
             
             // Create callback and deploy
-            System.debug('Creating callback and deploying...');
             Metadata.DeployCallback callback = new TriggerActionDeployCallback();
             Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
-            System.debug('Deployment initiated successfully');
             
-            System.debug('SObject Trigger Setting upsert deployment job ID: ' + jobId);
-            System.debug('Deployment initiated for: ' + developerName);
-            System.debug('Custom metadata values: ' + customMetadata.values);
             
             return String.valueOf(jobId);
             
         } catch (Exception e) {
-            System.debug('Error upserting trigger setting: ' + e.getMessage());
-            System.debug('Exception type: ' + e.getTypeName());
-            System.debug('Exception stack trace: ' + e.getStackTraceString());
             
             // For validation errors or other pre-deployment issues, we should still try to publish a platform event
             // to provide consistent error handling to the frontend
@@ -233,16 +198,12 @@ public with sharing class TriggerActionsExplorerController {
                     errorMessage = errorMessage.substring(0, 252) + '...';
                 }
                 callbackEvent.Message__c = errorMessage;
-                System.debug('Publishing pre-deployment error platform event with message: ' + errorMessage);
                 
                 Database.SaveResult publishResult = EventBus.publish(callbackEvent);
                 if (publishResult.isSuccess()) {
-                    System.debug('Platform event published for pre-deployment error');
                 } else {
-                    System.debug('Failed to publish platform event for pre-deployment error: ' + publishResult.getErrors());
                 }
             } catch (Exception publishException) {
-                System.debug('Error publishing platform event for pre-deployment error: ' + publishException.getMessage());
             }
             
             throw new AuraHandledException('Error upserting trigger setting: ' + e.getMessage());
@@ -302,8 +263,6 @@ public with sharing class TriggerActionsExplorerController {
     @AuraEnabled(cacheable=false)
     public static List<Trigger_Action__mdt> getTriggerActions(String timestamp) {
         try {
-            System.debug('getTriggerActions called with timestamp: ' + timestamp);
-            System.debug('Executing fresh query for trigger actions...');
             
             // Query all Trigger Action custom metadata records
             List<Trigger_Action__mdt> actions = [
@@ -317,11 +276,9 @@ public with sharing class TriggerActionsExplorerController {
                 ORDER BY Order__c ASC, DeveloperName ASC
             ];
             
-            System.debug('Fresh query returned ' + actions.size() + ' trigger actions');
             return actions;
             
         } catch (Exception e) {
-            System.debug('Error in fresh trigger actions query: ' + e.getMessage());
             throw new AuraHandledException('Error retrieving trigger actions: ' + e.getMessage());
         }
     }
@@ -334,11 +291,9 @@ public with sharing class TriggerActionsExplorerController {
     @AuraEnabled
     public static String updateTriggerActionsOrder(String actionsData) {
         try {
-            System.debug('updateTriggerActionsOrder called with data: ' + actionsData);
             
             // Parse the actions data
             List<Object> actionsList = (List<Object>) JSON.deserializeUntyped(actionsData);
-            System.debug('Parsed actions list size: ' + actionsList.size());
             
             // Create metadata container for batch update
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
@@ -350,7 +305,6 @@ public with sharing class TriggerActionsExplorerController {
                 String developerName = (String) actionMap.get('DeveloperName');
                 Decimal orderValue = (Decimal) actionMap.get('Order__c');
                 
-                System.debug('Processing action: ' + developerName + ' with order: ' + orderValue);
                 
                 // Create custom metadata instance
                 Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
@@ -367,19 +321,14 @@ public with sharing class TriggerActionsExplorerController {
                 mdContainer.addMetadata(customMetadata);
             }
             
-            System.debug('Created deployment container with ' + mdContainer.getMetadata().size() + ' metadata items');
             
             // Create callback and deploy
             Metadata.DeployCallback callback = new TriggerActionDeployCallback();
             Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
-            System.debug('Mass update deployment initiated with job ID: ' + jobId);
             
             return String.valueOf(jobId);
             
         } catch (Exception e) {
-            System.debug('Error updating trigger actions order: ' + e.getMessage());
-            System.debug('Exception type: ' + e.getTypeName());
-            System.debug('Exception stack trace: ' + e.getStackTraceString());
             
             // Publish platform event for error handling
             try {
@@ -389,9 +338,7 @@ public with sharing class TriggerActionsExplorerController {
                 callbackEvent.Status__c = 'failed';
                 callbackEvent.Message__c = 'Error updating trigger actions order: ' + e.getMessage();
                 EventBus.publish(callbackEvent);
-                System.debug('Published error platform event for mass update');
             } catch (Exception eventException) {
-                System.debug('Error publishing platform event: ' + eventException.getMessage());
             }
             
             throw new AuraHandledException('Error updating trigger actions order: ' + e.getMessage());

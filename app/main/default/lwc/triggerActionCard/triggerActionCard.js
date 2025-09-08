@@ -8,10 +8,7 @@ export default class TriggerActionCard extends LightningElement {
     @api visualOrder = null; // Visual position in the list (1, 2, 3...)
 
     connectedCallback() {
-        console.log('=== TriggerActionCard connected ===');
-        console.log('Action received:', this.action);
-        console.log(this.action.Bypass_Execution__c);
-        console.log('=== End connected ===');
+        // Component connected
     }
 
     get iconName() {

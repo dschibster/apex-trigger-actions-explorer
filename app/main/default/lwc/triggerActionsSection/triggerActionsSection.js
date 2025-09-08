@@ -15,25 +15,11 @@ export default class TriggerActionsSection extends LightningElement {
     }
 
     connectedCallback() {
-        console.log('=== TriggerActionsSection connected ===');
-        console.log('Title:', this.title);
-        console.log('Actions:', this.actions);
-        console.log('Actions length:', this.actions?.length);
-        console.log('Actions type:', typeof this.actions);
-        console.log('Actions keys:', this.actions ? Object.keys(this.actions) : 'No actions');
-        if (this.actions && this.actions.length > 0) {
-            console.log('First action:', this.actions[0]);
-            console.log('First action keys:', Object.keys(this.actions[0]));
-        }
-        console.log('=== End connected ===');
+        // Component connected
     }
 
     renderedCallback() {
-        console.log('=== TriggerActionsSection rendered ===');
-        console.log('Title:', this.title);
-        console.log('Actions:', this.actions);
-        console.log('Actions length:', this.actions?.length);
-        console.log('=== End rendered ===');
+        // Component rendered
     }
 
     handleView = (event) => {

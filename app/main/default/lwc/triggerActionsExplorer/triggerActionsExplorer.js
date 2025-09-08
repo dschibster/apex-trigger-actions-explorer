@@ -170,7 +170,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 this.clearSavedSelections();
             }
         } catch (error) {
-            console.warn('Failed to restore user selections:', error);
+            // Failed to restore user selections - continue with defaults
         }
     }
 
@@ -181,7 +181,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             
             // Fetch data using async/await with timestamp to force fresh data
             const timestamp = Date.now().toString();
-            console.log('Loading data with timestamp:', timestamp);
             const [settings, actions] = await Promise.all([
                 getTriggerSettings({ timestamp: timestamp }),
                 getTriggerActions({ timestamp: timestamp })
@@ -189,13 +188,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             
             this.triggerSettings = settings || [];
             this.triggerActions = actions || [];
-            
-            console.log('Data loaded - Trigger Actions count:', this.triggerActions.length);
-            console.log('All trigger actions with order:');
-            this.triggerActions.forEach((action, index) => {
-                console.log(`  ${index}: ${action.DeveloperName} - Order: ${action.Order__c}`);
-            });
-            console.log('First action data:', this.triggerActions[0] ? JSON.stringify(this.triggerActions[0], null, 2) : 'No actions');
             
             // Restore user selections from localStorage after data is loaded
             this.restoreUserSelections();
@@ -212,7 +204,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             this.updateDisplayActions();
             
         } catch (error) {
-            console.error('Error loading data:', error);
             this.error = error.message || 'Failed to load data';
         } finally {
             this.isLoading = false;
@@ -265,9 +256,7 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     }
 
     async handleTimingChange(event) {
-        console.log('Timing changed from', this.selectedTiming, 'to', event.detail.value);
         this.selectedTiming = event.detail.value;
-        console.log('After setting, selectedTiming is:', this.selectedTiming);
         
         // Only update display if we have both context and timing selected
         if (this.selectedContext && this.selectedTiming) {
@@ -277,7 +266,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
 
 
     async handleRefresh() {
-        console.log('Refresh button clicked - reloading data');
         await this.loadData();
     }
 
@@ -289,7 +277,6 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
                 this.selectedSettingData = setting;
                 this.settingModalMode = 'edit';
                 this.isSettingModalOpen = true;
-                console.log('Edit setting requested:', setting);
             }
         }
     }
@@ -298,44 +285,30 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         this.selectedSettingData = {};
         this.settingModalMode = 'create';
         this.isSettingModalOpen = true;
-        console.log('Add new setting requested');
     }
 
     updateDisplayActions() {
-        console.log('updateDisplayActions called');
-        console.log('Selected setting:', this.selectedSetting);
-        console.log('Selected context:', this.selectedContext);
-        console.log('Selected timing:', this.selectedTiming);
-        console.log('Trigger actions count:', this.triggerActions.length);
-        
         // Force complete reset first
         this.beforeActions = [];
         this.afterActions = [];
         
         if (!this.selectedSetting || !this.selectedContext || !this.selectedTiming) {
-            console.log('Missing selections, returning early');
             return;
         }
         
         const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
         if (!setting) {
-            console.log('Setting not found, returning early');
             return;
         }
         
-        console.log('Found setting:', setting.Object_API_Name__c);
-        
         // Get context fields to check based on the selected DML context
         const contextFields = this.getContextFields(this.selectedContext);
-        console.log('Context fields:', contextFields);
         
         // Filter actions that have the selected setting in any of the context fields
         // Note: The trigger action fields contain Id references to the trigger settings
         const filteredActions = this.triggerActions.filter(action => 
             contextFields.some(field => action[field] === setting.Id)
         );
-        
-        console.log('Filtered actions count:', filteredActions.length);
         
         // Create new arrays to force reactivity
         const newBeforeActions = [];
@@ -400,19 +373,10 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         newBeforeActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
         newAfterActions.sort((a, b) => (a.Order__c || 0) - (b.Order__c || 0));
         
-        console.log('After sorting:');
-        console.log('New before actions order:', newBeforeActions.map(a => `${a.DeveloperName}:${a.Order__c}`));
-        console.log('New after actions order:', newAfterActions.map(a => `${a.DeveloperName}:${a.Order__c}`));
         
         // Assign new arrays to trigger reactivity - ensure we're creating new array instances
         this.beforeActions = [...newBeforeActions];
         this.afterActions = [...newAfterActions];
-        
-        console.log('Display actions updated:');
-        console.log('Before actions:', this.beforeActions.length);
-        console.log('After actions:', this.afterActions.length);
-        console.log('Before actions data:', this.beforeActions);
-        console.log('After actions data:', this.afterActions);
         
         // Force a re-render by updating the main data array as well
         this.triggerActions = [...this.triggerActions];
@@ -427,15 +391,11 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     }
 
     get shouldShowBeforeActions() {
-        const shouldShow = this.selectedTiming === 'BEFORE' || this.selectedTiming === 'BOTH';
-        console.log('shouldShowBeforeActions getter:', shouldShow, 'selectedTiming:', this.selectedTiming, 'type:', typeof this.selectedTiming);
-        return shouldShow;
+        return this.selectedTiming === 'BEFORE' || this.selectedTiming === 'BOTH';
     }
 
     get shouldShowAfterActions() {
-        const shouldShow = this.selectedTiming === 'AFTER' || this.selectedTiming === 'BOTH';
-        console.log('shouldShowAfterActions getter:', shouldShow, 'selectedTiming:', this.selectedTiming, 'type:', typeof this.selectedTiming);
-        return shouldShow;
+        return this.selectedTiming === 'AFTER' || this.selectedTiming === 'BOTH';
     }
 
     getContextFields(context) {
