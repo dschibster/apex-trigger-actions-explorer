@@ -11,13 +11,11 @@ Trigger Actions Explorer requires the latest version of the Trigger Actions Fram
 <div>
 <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000ooicIAA" target="_blank">
   <img width="180" alt="Deploy to Salesforce"
-       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true">
-</a>
+       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true"></a>
 
 <a href="https://githubsfdeploy.herokuapp.com">
   <img width="180" alt="Deploy to Salesforce"
-       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unmanaged.png?raw=true">
-</a>
+       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unmanaged.png?raw=true"></a>
 </div>
 
 #### Sandbox
@@ -25,8 +23,7 @@ Trigger Actions Explorer requires the latest version of the Trigger Actions Fram
 <div>
 <a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000ooicIAA" target="_blank">
   <img width="180" alt="Deploy to Salesforce"
-       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true">
-</a>
+       src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true"></a>
 </div>
 
 1. **Unlocked Package** (Recommended): Click the install button above to install the unlocked package directly into your Salesforce org.
