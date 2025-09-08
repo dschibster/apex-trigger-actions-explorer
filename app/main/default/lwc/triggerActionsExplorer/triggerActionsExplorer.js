@@ -43,16 +43,16 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     // Test property to see if component loads
     testProperty = 'Component loaded successfully!';
 
-    // Context options for trigger actions - using DML statements
-    contextOptions = [
+    // Base context options for trigger actions - using DML statements
+    baseContextOptions = [
         { label: 'Created', value: 'CREATED' },
         { label: 'Updated', value: 'UPDATED' },
         { label: 'Deleted', value: 'DELETED' },
         { label: 'Restored', value: 'RESTORED' }
     ];
 
-    // Timing options for Before/After selection
-    timingOptions = [
+    // Base timing options for Before/After selection
+    baseTimingOptions = [
         { label: 'Before', value: 'BEFORE' },
         { label: 'After', value: 'AFTER' },
         { label: 'Before and After', value: 'BOTH' }
@@ -65,6 +65,53 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         'DELETED': ['BEFORE_DELETE', 'AFTER_DELETE'],
         'RESTORED': ['AFTER_UNDELETE']
     };
+
+    // Getter for context options based on selected object
+    get contextOptions() {
+        // Safety check: ensure triggerSettings is loaded
+        if (!this.triggerSettings || this.triggerSettings.length === 0) {
+            return this.baseContextOptions;
+        }
+
+        if (!this.selectedSetting) {
+            return this.baseContextOptions;
+        }
+
+        const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+        if (!setting) {
+            return this.baseContextOptions;
+        }
+
+        const objectApiName = setting.Object_API_Name__c;
+        
+        // For ChangeEvent objects (ending with ChangeEvent or __e), only show Created (After Insert)
+        if (objectApiName && (objectApiName.endsWith('ChangeEvent') || objectApiName.endsWith('__e'))) {
+            return [{ label: 'Created', value: 'CREATED' }];
+        }
+
+        return this.baseContextOptions;
+    }
+
+    // Getter for timing options based on selected context and object
+    get timingOptions() {
+        // For Restored context, only show After (no Before or Before and After)
+        if (this.selectedContext === 'RESTORED') {
+            return [{ label: 'After', value: 'AFTER' }];
+        }
+
+        // For ChangeEvent objects, only show After (no Before or Before and After)
+        if (this.selectedSetting && this.triggerSettings && this.triggerSettings.length > 0) {
+            const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+            if (setting) {
+                const objectApiName = setting.Object_API_Name__c;
+                if (objectApiName && (objectApiName.endsWith('ChangeEvent') || objectApiName.endsWith('__e'))) {
+                    return [{ label: 'After', value: 'AFTER' }];
+                }
+            }
+        }
+
+        return this.baseTimingOptions;
+    }
 
     connectedCallback() {
         // Load data when component connects
@@ -178,19 +225,52 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
         this.selectedSettingDeveloperName = setting ? setting.DeveloperName : '';
         
-        this.updateDisplayActions();
+        // Auto-select context and timing based on object type
+        const objectApiName = setting ? setting.Object_API_Name__c : '';
+        
+        if (objectApiName && (objectApiName.endsWith('ChangeEvent') || objectApiName.endsWith('__e'))) {
+            // For ChangeEvent objects: auto-select Created + After
+            this.selectedContext = 'CREATED';
+            this.selectedTiming = 'AFTER';
+        } else {
+            // For regular objects: auto-select Created + Before
+            this.selectedContext = 'CREATED';
+            this.selectedTiming = 'BEFORE';
+        }
+        
+        // Update display actions if we have both selections
+        if (this.selectedContext && this.selectedTiming) {
+            this.updateDisplayActions();
+        }
     }
 
     async handleContextChange(event) {
         this.selectedContext = event.detail.value;
-        this.updateDisplayActions();
+        
+        // Auto-select timing based on context
+        if (this.selectedContext === 'RESTORED') {
+            // For Restored context: auto-select After
+            this.selectedTiming = 'AFTER';
+        } else {
+            // For other contexts: auto-select Before
+            this.selectedTiming = 'BEFORE';
+        }
+        
+        // Update display actions if we have both selections
+        if (this.selectedContext && this.selectedTiming) {
+            this.updateDisplayActions();
+        }
     }
 
     async handleTimingChange(event) {
         console.log('Timing changed from', this.selectedTiming, 'to', event.detail.value);
         this.selectedTiming = event.detail.value;
         console.log('After setting, selectedTiming is:', this.selectedTiming);
-        this.updateDisplayActions();
+        
+        // Only update display if we have both context and timing selected
+        if (this.selectedContext && this.selectedTiming) {
+            this.updateDisplayActions();
+        }
     }
 
 
