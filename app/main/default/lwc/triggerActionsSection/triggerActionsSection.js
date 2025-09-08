@@ -8,6 +8,7 @@ export default class TriggerActionsSection extends LightningElement {
     
     @track isExpanded = true;
     @track isEditOrderMode = false;
+    @track isManualEditMode = false; // Toggle between arrow and manual edit modes
     @track originalActions = []; // Store original order for cancel
 
     get isThisSectionUpdating() {
@@ -58,6 +59,7 @@ export default class TriggerActionsSection extends LightningElement {
         // Store original order for cancel functionality
         this.originalActions = [...this.actions];
         this.isEditOrderMode = true;
+        this.isManualEditMode = false; // Start with arrow mode
         
         // Add isFirstItem and isLastItem properties to actions
         this.updateActionProperties();
@@ -66,6 +68,10 @@ export default class TriggerActionsSection extends LightningElement {
         this.dispatchEvent(new CustomEvent('entereditmode', {
             detail: { sectionTitle: this.title }
         }));
+    }
+
+    handleToggleManualMode() {
+        this.isManualEditMode = !this.isManualEditMode;
     }
 
     updateActionProperties() {
@@ -79,11 +85,21 @@ export default class TriggerActionsSection extends LightningElement {
     }
 
     handleSaveOrder() {
-        // Calculate new order values based on current position
-        const updatedActions = this.actions.map((action, index) => ({
-            ...action,
-            Order__c: (index + 1) * 0.0001 // Use small increments for ordering
-        }));
+        let updatedActions;
+        
+        if (this.isManualEditMode) {
+            // Use manual order numbers from input fields - preserve exact values
+            updatedActions = this.actions.map((action) => ({
+                ...action,
+                Order__c: action.manualOrder ? parseFloat(action.manualOrder) : action.Order__c
+            }));
+        } else {
+            // Calculate new order values based on current position
+            updatedActions = this.actions.map((action, index) => ({
+                ...action,
+                Order__c: (index + 1) * 0.0001 // Use small increments for ordering
+            }));
+        }
 
         // Dispatch event to parent with updated actions
         this.dispatchEvent(new CustomEvent('saveorder', {
@@ -94,6 +110,7 @@ export default class TriggerActionsSection extends LightningElement {
         }));
 
         this.isEditOrderMode = false;
+        this.isManualEditMode = false;
         this.originalActions = [];
     }
 
@@ -101,7 +118,50 @@ export default class TriggerActionsSection extends LightningElement {
         // Restore original order
         this.actions = [...this.originalActions];
         this.isEditOrderMode = false;
+        this.isManualEditMode = false;
         this.originalActions = [];
+    }
+
+    handleManualOrderChange(event) {
+        const { actionId, orderValue } = event.detail;
+        const actionIndex = this.actions.findIndex(action => action.Id === actionId);
+        
+        if (actionIndex !== -1) {
+            // Create a new array with the updated action to maintain reactivity
+            this.actions = this.actions.map((action, index) => 
+                index === actionIndex 
+                    ? { ...action, manualOrder: orderValue }
+                    : action
+            );
+        }
+    }
+
+    handleManualOrderBlur(event) {
+        const { actionId, orderValue } = event.detail;
+        const actionIndex = this.actions.findIndex(action => action.Id === actionId);
+        
+        if (actionIndex !== -1) {
+            // Create a new array with the updated action to maintain reactivity
+            this.actions = this.actions.map((action, index) => 
+                index === actionIndex 
+                    ? { ...action, manualOrder: orderValue }
+                    : action
+            );
+            // Trigger real-time sorting when field loses focus
+            this.sortActionsByManualOrder();
+        }
+    }
+
+    sortActionsByManualOrder() {
+        // Sort actions by their manual order values
+        this.actions = [...this.actions].sort((a, b) => {
+            const orderA = parseFloat(a.manualOrder) || parseFloat(a.Order__c) || 0;
+            const orderB = parseFloat(b.manualOrder) || parseFloat(b.Order__c) || 0;
+            return orderA - orderB;
+        });
+        
+        // Update the isFirstItem and isLastItem properties after sorting
+        this.updateActionProperties();
     }
 
     // Method to handle move up/down from child cards

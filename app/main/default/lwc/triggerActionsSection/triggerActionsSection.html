@@ -26,21 +26,30 @@
                         </lightning-button>
                     </template>
                     <template if:true={isEditOrderMode}>
-                        <lightning-button 
-                            variant="brand" 
-                            label="Save Order" 
-                            icon-name="utility:check"
-                            size="small"
-                            onclick={handleSaveOrder}
-                            class="slds-m-right_small">
-                        </lightning-button>
-                        <lightning-button 
-                            variant="neutral" 
-                            label="Cancel" 
-                            icon-name="utility:close"
-                            size="small"
-                            onclick={handleCancelOrder}>
-                        </lightning-button>
+                        <div class="slds-grid slds-grid_align-center">
+                            <span class="slds-text-body_small slds-m-right_x-small">Manual:</span>
+                            <lightning-input 
+                                type="toggle" 
+                                checked={isManualEditMode}
+                                onchange={handleToggleManualMode}
+                                class="slds-m-right_small">
+                            </lightning-input>
+                            <lightning-button 
+                                variant="brand" 
+                                label="Save Order" 
+                                icon-name="utility:check"
+                                size="small"
+                                onclick={handleSaveOrder}
+                                class="slds-m-right_small">
+                            </lightning-button>
+                            <lightning-button 
+                                variant="neutral" 
+                                label="Cancel" 
+                                icon-name="utility:close"
+                                size="small"
+                                onclick={handleCancelOrder}>
+                            </lightning-button>
+                        </div>
                     </template>
                     <slot name="actions"></slot>
                 </div>
@@ -68,12 +77,15 @@
                                     action={act}
                                     visual-order={index}
                                     is-edit-order-mode={isEditOrderMode}
+                                    is-manual-edit-mode={isManualEditMode}
                                     is-first-item={act.isFirstItem}
                                     is-last-item={act.isLastItem}
                                     onview={handleView}
                                     onedit={handleEdit}
                                     ondelete={handleDelete}
-                                    onmoveaction={handleMoveAction}>
+                                    onmoveaction={handleMoveAction}
+                                    onmanualorderchange={handleManualOrderChange}
+                                    onmanualorderblur={handleManualOrderBlur}>
                                 </c-trigger-action-card>
                             </template>
                         </div>

@@ -3,6 +3,7 @@ import { LightningElement, api } from 'lwc';
 export default class TriggerActionCard extends LightningElement {
     @api action;
     @api isEditOrderMode = false;
+    @api isManualEditMode = false;
     @api isFirstItem = false;
     @api isLastItem = false;
     @api visualOrder = null; // Visual position in the list (1, 2, 3...)
@@ -21,8 +22,8 @@ export default class TriggerActionCard extends LightningElement {
     }
 
     get displayOrder() {
-        // Show visual order if available (add 1 since arrays are 0-based), otherwise fall back to database order
-        return this.visualOrder !== null ? (this.visualOrder + 1) : (this.action?.Order__c || 0);
+        // Always show the actual Order__c value from the database, not the visual position
+        return this.action?.Order__c || 0;
     }
 
 
@@ -40,6 +41,11 @@ export default class TriggerActionCard extends LightningElement {
 
     get classOrFlowName() {
         return this.action?.Flow_Name__c || this.action?.Apex_Class_Name__c || '';
+    }
+
+    get manualOrderValue() {
+        // Return the manual order if set, otherwise fall back to the original order
+        return this.action?.manualOrder !== undefined ? this.action.manualOrder : (this.action?.Order__c || 0);
     }
 
     get metadataUrl() {
@@ -79,6 +85,49 @@ export default class TriggerActionCard extends LightningElement {
             detail: { 
                 actionId: this.action.Id,
                 direction: 'down'
+            }
+        }));
+    }
+
+    handleManualOrderChange(event) {
+        const orderValue = event.target.value;
+        
+        // Validate 4 decimal places
+        const decimalPlaces = (orderValue.toString().split('.')[1] || '').length;
+        if (decimalPlaces > 4) {
+            event.target.setCustomValidity('Maximum 4 decimal places allowed');
+            event.target.reportValidity();
+            return;
+        } else {
+            event.target.setCustomValidity('');
+        }
+
+        this.dispatchEvent(new CustomEvent('manualorderchange', {
+            detail: { 
+                actionId: this.action.Id,
+                orderValue: orderValue // Keep as string to preserve exact value
+            }
+        }));
+    }
+
+    handleManualOrderBlur(event) {
+        const orderValue = event.target.value;
+        
+        // Validate 4 decimal places
+        const decimalPlaces = (orderValue.toString().split('.')[1] || '').length;
+        if (decimalPlaces > 4) {
+            event.target.setCustomValidity('Maximum 4 decimal places allowed');
+            event.target.reportValidity();
+            return;
+        } else {
+            event.target.setCustomValidity('');
+        }
+
+        // Trigger reordering when field loses focus
+        this.dispatchEvent(new CustomEvent('manualorderblur', {
+            detail: { 
+                actionId: this.action.Id,
+                orderValue: orderValue
             }
         }));
     }

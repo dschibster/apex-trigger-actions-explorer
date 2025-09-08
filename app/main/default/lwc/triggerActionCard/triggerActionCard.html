@@ -7,25 +7,41 @@
                     <span class="slds-text-heading_small slds-text-color_weak">{displayOrder}</span>
                 </template>
                 <template if:true={isEditOrderMode}>
-                    <div class="slds-grid slds-grid_vertical slds-grid_align-center">
-                        <lightning-button-icon
-                            variant="neutral"
-                            icon-name="utility:up"
-                            size="x-small"
-                            title="Move Up"
-                            onclick={handleMoveUp}
-                            disabled={isFirstItem}
-                            class="slds-m-bottom_xx-small">
-                        </lightning-button-icon>
-                        <lightning-button-icon
-                            variant="neutral"
-                            icon-name="utility:down"
-                            size="x-small"
-                            title="Move Down"
-                            onclick={handleMoveDown}
-                            disabled={isLastItem}>
-                        </lightning-button-icon>
-                    </div>
+                    <template if:false={isManualEditMode}>
+                        <div class="slds-grid slds-grid_vertical slds-grid_align-center compact-order-controls">
+                            <lightning-button-icon
+                                variant="neutral"
+                                icon-name="utility:up"
+                                size="x-small"
+                                title="Move Up"
+                                onclick={handleMoveUp}
+                                disabled={isFirstItem}
+                                class="slds-m-bottom_xx-small compact-button">
+                            </lightning-button-icon>
+                            <lightning-button-icon
+                                variant="neutral"
+                                icon-name="utility:down"
+                                size="x-small"
+                                title="Move Down"
+                                onclick={handleMoveDown}
+                                disabled={isLastItem}
+                                class="compact-button">
+                            </lightning-button-icon>
+                        </div>
+                    </template>
+                    <template if:true={isManualEditMode}>
+                        <lightning-input
+                            type="number"
+                            value={manualOrderValue}
+                            step="0.0001"
+                            min="0"
+                            max="999999.9999"
+                            onchange={handleManualOrderChange}
+                            onblur={handleManualOrderBlur}
+                            variant="label-hidden"
+                            class="slds-p-left_small slds-grid slds-grid_vertical slds-grid_align-center">
+                        </lightning-input>
+                    </template>
                 </template>
             </div>
             

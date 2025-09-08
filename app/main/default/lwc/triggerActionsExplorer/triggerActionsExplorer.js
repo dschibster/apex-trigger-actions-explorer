@@ -1020,14 +1020,14 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
             // Save current user selections before deployment
             this.saveUserSelections();
             
-            // Prepare actions data for mass update with full integer enumeration
-            const actionsToUpdate = updatedActions.map((action, index) => ({
+            // Prepare actions data for mass update - preserve the Order__c values from the section
+            const actionsToUpdate = updatedActions.map((action) => ({
                 DeveloperName: action.DeveloperName,
                 Label: action.Label || action.DeveloperName,
-                Order__c: parseInt(index + 1, 10) // Ensure full integer, order starts from 1
+                Order__c: action.Order__c // Use the Order__c value as determined by the section (manual or enumerated)
             }));
             
-            console.log('Prepared actions for mass update with full integer enumeration:');
+            console.log('Prepared actions for mass update preserving order values:');
             actionsToUpdate.forEach((action, index) => {
                 console.log(`  ${index + 1}. ${action.DeveloperName} -> Order: ${action.Order__c} (type: ${typeof action.Order__c})`);
             });
