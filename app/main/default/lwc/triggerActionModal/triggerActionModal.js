@@ -11,6 +11,7 @@ export default class TriggerActionModal extends LightningElement {
     @api selectedSettingId = ''; // The selected trigger setting ID
     @api selectedSettingDeveloperName = ''; // The selected trigger setting DeveloperName
     @api selectedSettingObjectApiName = ''; // The selected trigger setting Object API Name
+    @api selectedSettingTriggerRecordClassName = ''; // The selected trigger setting TriggerRecord Class Name
     @api existingDeveloperNames = []; // Cache of existing DeveloperNames for duplicate validation
     
     @track actionData = {};
@@ -271,11 +272,26 @@ export default class TriggerActionModal extends LightningElement {
         return this.mode === 'edit' || this.mode === 'view';
     }
 
-    get developerNameTooltip() {
+    get developerNameHelptext() {
         if (this.mode === 'edit' || this.mode === 'view') {
             return 'Developer Name cannot be changed. To modify the Developer Name, please edit the record in the standard Salesforce setup page.';
         }
         return '';
+    }
+
+    get isEntryCriteriaDisabled() {
+        return !this.selectedSettingTriggerRecordClassName || this.selectedSettingTriggerRecordClassName.trim() === '';
+    }
+
+    get isEntryCriteriaFieldDisabled() {
+        return this.isReadOnly || this.isEntryCriteriaDisabled;
+    }
+
+    get entryCriteriaHelptext() {
+        if (this.isEntryCriteriaDisabled) {
+            return 'Please create a TriggerRecord class for the SObject before applying Entry Criteria';
+        }
+        return 'Uses Formula syntax, pay attention to functions like ISPICKVAL for Picklists';
     }
 
     get supportsChangeDataPlatform() {

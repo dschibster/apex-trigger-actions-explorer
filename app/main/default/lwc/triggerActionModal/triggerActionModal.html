@@ -111,8 +111,8 @@
                                 onchange={handleFieldChange}
                                 data-field="DeveloperName"
                                 disabled={isDeveloperNameReadOnly}
-                                title={developerNameTooltip}
-                                required={isCreateMode}>
+                                required={isCreateMode}
+                                field-level-help={developerNameHelptext}>
                             </lightning-input>
                         </lightning-layout-item>
                         <lightning-layout-item size="6" padding="around-small">
@@ -202,8 +202,9 @@
                                 value={actionData.Entry_Criteria__c}
                                 onchange={handleFieldChange}
                                 data-field="Entry_Criteria__c"
-                                disabled={isReadOnly}
-                                rows="3">
+                                disabled={isEntryCriteriaFieldDisabled}
+                                rows="3"
+                                field-level-help={entryCriteriaHelptext}>
                             </lightning-textarea>
                         </lightning-layout-item>
                     </lightning-layout>

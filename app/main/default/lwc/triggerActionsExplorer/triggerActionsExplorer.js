@@ -452,6 +452,12 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         return setting ? setting.Object_API_Name__c : '';
     }
 
+    get selectedSettingTriggerRecordClassName() {
+        if (!this.selectedSetting) return '';
+        const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
+        return setting ? setting.TriggerRecord_Class_Name__c : '';
+    }
+
     get selectedSettingBadgeLabel() {
         if (!this.selectedSetting) return '';
         const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
