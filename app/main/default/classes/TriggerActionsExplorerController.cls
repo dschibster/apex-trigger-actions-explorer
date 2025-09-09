@@ -65,9 +65,9 @@ public with sharing class TriggerActionsExplorerController {
             addFieldValue(customMetadata, 'Description__c', (String) actionMap.get('Description__c'));
             addFieldValue(customMetadata, 'Apex_Class_Name__c', (String) actionMap.get('Apex_Class_Name__c'));
             addFieldValue(customMetadata, 'Flow_Name__c', (String) actionMap.get('Flow_Name__c'));
-            addFieldValue(customMetadata, 'Entry_Criteria__c', (String) actionMap.get('Entry_Criteria__c'));
-            addFieldValue(customMetadata, 'Required_Permission__c', (String) actionMap.get('Required_Permission__c'));
-            addFieldValue(customMetadata, 'Bypass_Permission__c', (String) actionMap.get('Bypass_Permission__c'));
+            addFieldValue(customMetadata, 'Entry_Criteria__c', (String) actionMap.get('Entry_Criteria__c'), true);
+            addFieldValue(customMetadata, 'Required_Permission__c', (String) actionMap.get('Required_Permission__c'), true);
+            addFieldValue(customMetadata, 'Bypass_Permission__c', (String) actionMap.get('Bypass_Permission__c'), true);
             
             // Add numeric fields
             addNumericFieldValue(customMetadata, 'Order__c', actionMap.get('Order__c'));
@@ -88,7 +88,7 @@ public with sharing class TriggerActionsExplorerController {
             // Deploy the metadata
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(customMetadata);
-            
+            System.debug(JSON.serializePretty(mdContainer));
             // Create callback and deploy
             Metadata.DeployCallback callback = new TriggerActionDeployCallback();
             Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, callback);
@@ -158,10 +158,10 @@ public with sharing class TriggerActionsExplorerController {
             
             // Add field values
             addFieldValue(customMetadata, 'Object_API_Name__c', (String) settingMap.get('Object_API_Name__c'));
-            addFieldValue(customMetadata, 'Object_Namespace__c', (String) settingMap.get('Object_Namespace__c'));
-            addFieldValue(customMetadata, 'TriggerRecord_Class_Name__c', (String) settingMap.get('TriggerRecord_Class_Name__c'));
-            addFieldValue(customMetadata, 'Required_Permission__c', (String) settingMap.get('Required_Permission__c'));
-            addFieldValue(customMetadata, 'Bypass_Permission__c', (String) settingMap.get('Bypass_Permission__c'));
+            addFieldValue(customMetadata, 'Object_Namespace__c', (String) settingMap.get('Object_Namespace__c'), true);
+            addFieldValue(customMetadata, 'TriggerRecord_Class_Name__c', (String) settingMap.get('TriggerRecord_Class_Name__c'), true);
+            addFieldValue(customMetadata, 'Required_Permission__c', (String) settingMap.get('Required_Permission__c'), true);
+            addFieldValue(customMetadata, 'Bypass_Permission__c', (String) settingMap.get('Bypass_Permission__c'), true);
             
             // Add boolean fields
             try {
@@ -214,14 +214,22 @@ public with sharing class TriggerActionsExplorerController {
     /**
      * Helper method to add string field values to custom metadata
      */
-    private static void addFieldValue(Metadata.CustomMetadata customMetadata, String fieldName, String value) {
-        if (String.isNotBlank(value)) {
+    private static void addFieldValue(Metadata.CustomMetadata customMetadata, String fieldName, String value, Boolean allowNull) {
+        if (allowNull || String.isNotBlank(value)) {
             Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
             fieldValue.field = fieldName;
             fieldValue.value = value;
             customMetadata.values.add(fieldValue);
         }
     }
+
+    /**
+     * Helper method to add string field values to custom metadata
+     */
+    private static void addFieldValue(Metadata.CustomMetadata customMetadata, String fieldName, String value) {
+        addFieldValue(customMetadata, fieldName, value, false);
+    }
+    
     
     /**
      * Helper method to add numeric field values to custom metadata
