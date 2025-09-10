@@ -128,14 +128,14 @@
                         
                         <!-- Row 4: Description (full width) -->
                         <lightning-layout-item size="12" padding="around-small">
-                            <lightning-input 
+                            <lightning-textarea 
                                 label="Description" 
                                 value={actionData.Description__c}
                                 onchange={handleFieldChange}
                                 data-field="Description__c"
                                 disabled={isReadOnly}
                                 required={isDescriptionRequired}>
-                            </lightning-input>
+                            </lightning-textarea>
                         </lightning-layout-item>
                         
                         <!-- Row 5: Order and Required Permission -->
