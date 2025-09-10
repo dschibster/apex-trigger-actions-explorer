@@ -7,7 +7,7 @@ echo "sf package version create -p PACKAGE_ID -f config/project-scratch-def.json
 
 PACKAGE_ID=$( jq -r 'first(.packageAliases[])' sfdx-project.json )
 
-sf package version create  -p $PACKAGE_ID -f config/project-scratch-def.json -x -v devhub -c --json -w 50 > result.json
+sf package version create  -p $PACKAGE_ID -f config/project-scratch-def.json -x -v devhub -c --json -w 50 | tee result.json 
 
 cat result.json | jq -r '.result.SubscriberPackageVersionId' > packgeversionid.txt
 
@@ -20,8 +20,6 @@ fi
 echo "New Package Version Id: $PACKAGEVERSIONID"
 
 echo "Updating docs"
-#updates docs with new installation id
-sed -i "s/04t.\{15\}/$PACKAGEVERSIONID/g" docs/installation.md
 
 #updates README with new installation id
 sed -i "s/04t.\{15\}/$PACKAGEVERSIONID/g" README.md
