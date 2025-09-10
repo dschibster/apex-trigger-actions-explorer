@@ -41,9 +41,10 @@ jobs:
             - name: Delete Scratch Org
               run: sf org delete scratch --no-prompt
             - name: Upload code coverage for Apex to Codecov.io
-              uses: codecov/codecov-action@v2
+              uses: codecov/codecov-action@v5
               with:
-                  flags: Apex
+                token: ${{ secrets.CODECOV_TOKEN }}
+                flags: Apex
             - name: Create new Package version
               if: github.event.action != 'closed' && github.event_name == 'pull_request' && github.actor == github.event.repository.owner.login
               env:

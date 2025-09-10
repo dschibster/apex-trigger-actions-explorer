@@ -115,6 +115,10 @@ export default class TriggerActionModal extends LightningElement {
     }
 
     initializeData() {
+        // Clear validation result when modal opens
+        this.formulaValidationResult = null;
+        this.isValidatingFormula = false;
+        
         if (this.mode === 'create') {
             // Initialize with empty data for creation
             this.actionData = {
@@ -300,7 +304,8 @@ export default class TriggerActionModal extends LightningElement {
     }
 
     get showValidateButton() {
-        return !this.isReadOnly && !this.isEntryCriteriaDisabled && this.selectedSettingTriggerRecordClassName;
+        return !this.isReadOnly && !this.isEntryCriteriaDisabled && this.selectedSettingTriggerRecordClassName && 
+               this.actionData.Entry_Criteria__c && this.actionData.Entry_Criteria__c.trim().length > 0;
     }
 
     get validationMessage() {
@@ -320,6 +325,11 @@ export default class TriggerActionModal extends LightningElement {
         }
         // Also disable if currently validating
         if (this.isValidatingFormula) {
+            return true;
+        }
+        // Disable if there's Entry Criteria content but no validation result yet
+        if (this.actionData.Entry_Criteria__c && this.actionData.Entry_Criteria__c.trim().length > 0 && 
+            !this.formulaValidationResult) {
             return true;
         }
         return false;
