@@ -207,40 +207,40 @@
                                 field-level-help={entryCriteriaHelptext}>
                             </lightning-textarea>
                             
-                            <!-- Validate Button and Results -->
+                            <!-- Validation Result Display -->
+                            <template if:true={formulaValidationResult}>
+                                <div class="slds-m-top_small">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-text-align_left">
+                                        <template if:true={formulaValidationResult.success}>
+                                            <lightning-icon 
+                                                icon-name="utility:success" 
+                                                size="x-small" 
+                                                class="slds-m-right_x-small slds-text-color_success">
+                                            </lightning-icon>
+                                        </template>
+                                        <template if:false={formulaValidationResult.success}>
+                                            <lightning-icon 
+                                                icon-name="utility:error" 
+                                                size="x-small" 
+                                                class="slds-m-right_x-small slds-text-color_error">
+                                            </lightning-icon>
+                                        </template>
+                                        <span class={validationMessageClass}>{validationMessage}</span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Validate Button -->
                             <template if:true={showValidateButton}>
                                 <div class="slds-m-top_small">
-                                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center ">
-                                        <lightning-button 
-                                            variant="neutral" 
-                                            label="Validate" 
-                                            icon-name="utility:check"
-                                            onclick={handleValidateFormula}
-                                            disabled={isValidatingFormula}
-                                            size="small"
-                                            class="">
-                                        </lightning-button>
-                                        
-                                        <template if:true={formulaValidationResult}>
-                                            <div class="slds-grid slds-grid_vertical-align-center slds-m-left_x-small slds-text-align_left">
-                                                <template if:true={formulaValidationResult.success}>
-                                                    <lightning-icon 
-                                                        icon-name="utility:success" 
-                                                        size="x-small" 
-                                                        class="slds-m-right_x-small slds-text-color_success">
-                                                    </lightning-icon>
-                                                </template>
-                                                <template if:false={formulaValidationResult.success}>
-                                                    <lightning-icon 
-                                                        icon-name="utility:error" 
-                                                        size="x-small" 
-                                                        class="slds-m-right_x-small slds-text-color_error">
-                                                    </lightning-icon>
-                                                </template>
-                                                <span class={validationMessageClass}>{validationMessage}</span>
-                                            </div>
-                                        </template>
-                                    </div>
+                                    <lightning-button 
+                                        variant="neutral" 
+                                        label="Validate" 
+                                        icon-name="utility:check"
+                                        onclick={handleValidateFormula}
+                                        disabled={isValidatingFormula}
+                                        size="small">
+                                    </lightning-button>
                                 </div>
                             </template>
                         </lightning-layout-item>
