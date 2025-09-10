@@ -1,0 +1,27 @@
+site_name: Trigger Actions Explorer
+repo_url: https://github.com/dschibster/apex-trigger-actions-explorer
+repo_name: dschibster/apex-trigger-actions-explorer
+edit_uri: ""
+
+nav:
+  - Introduction: 'index.md'
+  - Installation: 'installation.md'
+  - Creating Trigger Settings: 'creating-trigger-settings.md'
+  - Creating Trigger Actions: 'creating-trigger-actions.md'
+  - Sorting Trigger Actions: 'sorting-trigger-actions.md'
+
+theme:
+  name: material
+
+  palette: 
+    scheme: slate
+    primary: blue
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+  

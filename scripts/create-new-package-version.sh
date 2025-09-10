@@ -24,11 +24,16 @@ echo "Updating docs"
 #updates README with new installation id
 sed -i "s/04t.\{15\}/$PACKAGEVERSIONID/g" README.md
 
+#updates docs with new installation id
+sed -i "s/04t.\{15\}/$PACKAGEVERSIONID/g" docs/installation.md
+
+
 git add README.md
+git add docs/installation.md
 git add sfdx-project.json
 git config --local user.email "action@github.com"
 git config --local user.name "GitHub Action Bot"
-git commit -m "Update Package Version sfdx-project.json and README"
+git commit -m "Update Package Version sfdx-project.json, README, and docs"
 git push
 
 LATEST_HASH=$(git rev-parse HEAD)
