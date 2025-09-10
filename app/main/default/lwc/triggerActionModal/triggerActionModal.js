@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import validateDeveloperNameUnique from '@salesforce/apex/TriggerActionsExplorerController.validateDeveloperNameUnique';
+import evaluateFormula from '@salesforce/apex/TriggerActionsExpFormulaEval.evaluateFormula';
 
 export default class TriggerActionModal extends LightningElement {
     @api isOpen = false;
@@ -11,12 +12,17 @@ export default class TriggerActionModal extends LightningElement {
     @api selectedSettingId = ''; // The selected trigger setting ID
     @api selectedSettingDeveloperName = ''; // The selected trigger setting DeveloperName
     @api selectedSettingObjectApiName = ''; // The selected trigger setting Object API Name
+    @api selectedSettingTriggerRecordClassName = ''; // The selected trigger setting TriggerRecord Class Name
     @api existingDeveloperNames = []; // Cache of existing DeveloperNames for duplicate validation
     
     @track actionData = {};
     @track originalData = {};
     @track modalError = null;
     @track _currentActionId = null;
+    
+    // Formula validation properties
+    @track isValidatingFormula = false;
+    @track formulaValidationResult = null;
     @track _isCreateDataInitialized = false;
     @track selectedActionType = 'apex'; // 'apex', 'flow', or 'flow-cdp' - default to apex
 
@@ -271,11 +277,56 @@ export default class TriggerActionModal extends LightningElement {
         return this.mode === 'edit' || this.mode === 'view';
     }
 
-    get developerNameTooltip() {
+    get developerNameHelptext() {
         if (this.mode === 'edit' || this.mode === 'view') {
             return 'Developer Name cannot be changed. To modify the Developer Name, please edit the record in the standard Salesforce setup page.';
         }
         return '';
+    }
+
+    get isEntryCriteriaDisabled() {
+        return !this.selectedSettingTriggerRecordClassName || this.selectedSettingTriggerRecordClassName.trim() === '';
+    }
+
+    get isEntryCriteriaFieldDisabled() {
+        return this.isReadOnly || this.isEntryCriteriaDisabled;
+    }
+
+    get entryCriteriaHelptext() {
+        if (this.isEntryCriteriaDisabled) {
+            return 'Please create a TriggerRecord class for the SObject before applying Entry Criteria';
+        }
+        return 'Uses Formula syntax, pay attention to functions like ISPICKVAL for Picklists';
+    }
+
+    get showValidateButton() {
+        return !this.isReadOnly && !this.isEntryCriteriaDisabled && this.selectedSettingTriggerRecordClassName;
+    }
+
+    get validationMessage() {
+        if (!this.formulaValidationResult) return '';
+        return this.formulaValidationResult.success ? 'Valid!' : this.formulaValidationResult.errorMessage;
+    }
+
+    get validationMessageClass() {
+        if (!this.formulaValidationResult) return '';
+        return this.formulaValidationResult.success ? 'slds-text-color_success' : 'slds-text-color_error';
+    }
+
+    get isSaveButtonDisabled() {
+        // Disable save button if validation has been run and returned an error
+        if (this.formulaValidationResult && !this.formulaValidationResult.success) {
+            return true;
+        }
+        // Also disable if currently validating
+        if (this.isValidatingFormula) {
+            return true;
+        }
+        return false;
+    }
+
+    get saveButtonDisabled() {
+        return this.isUpdating || this.isSaveButtonDisabled;
     }
 
     get supportsChangeDataPlatform() {
@@ -319,6 +370,11 @@ export default class TriggerActionModal extends LightningElement {
             ...this.actionData,
             [field]: value
         };
+        
+        // Clear formula validation result when Entry Criteria changes
+        if (field === 'Entry_Criteria__c') {
+            this.formulaValidationResult = null;
+        }
         
         // Regenerate DeveloperName and Label when Flow Name or Apex Class Name changes in create mode
         if (this.mode === 'create' && (field === 'Flow_Name__c' || field === 'Apex_Class_Name__c')) {
@@ -472,7 +528,34 @@ export default class TriggerActionModal extends LightningElement {
         this._isCreateDataInitialized = false;
         // Reset action type to default
         this.selectedActionType = 'apex';
+        // Clear formula validation result
+        this.formulaValidationResult = null;
         this.dispatchEvent(new CustomEvent('close'));
+    }
+
+    async handleValidateFormula() {
+        if (!this.actionData.Entry_Criteria__c || !this.selectedSettingTriggerRecordClassName) {
+            return;
+        }
+
+        this.isValidatingFormula = true;
+        this.formulaValidationResult = null;
+
+        try {
+            const result = await evaluateFormula({
+                formulaExp: this.actionData.Entry_Criteria__c,
+                triggerRecordClass: this.selectedSettingTriggerRecordClassName
+            });
+            
+            this.formulaValidationResult = result;
+        } catch (error) {
+            this.formulaValidationResult = {
+                success: false,
+                errorMessage: error.body?.message || error.message || 'Validation failed'
+            };
+        } finally {
+            this.isValidatingFormula = false;
+        }
     }
 
     handleCancel() {

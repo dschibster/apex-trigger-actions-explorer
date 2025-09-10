@@ -71,6 +71,8 @@
                                 <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
                                 <span class="slds-text-color_weak slds-text-body_small">{classOrFlowName}</span>
                             </template>
+                            <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
+                            <span class="slds-text-color_weak slds-text-body_small">{entryCriteriaLabel}</span>
                         </div>
                     </div>
                     <p class="slds-text-body_small slds-text-color_weak slds-truncate">{action.Description__c}</p>
@@ -84,7 +86,8 @@
                     class={statusClass}>
                 </lightning-badge>
             </div>
-            
+
+
             <!-- Chevron Dropdown -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <lightning-button-menu 
