@@ -7,6 +7,7 @@ export default class TriggerActionCard extends LightningElement {
     @api isFirstItem = false;
     @api isLastItem = false;
     @api visualOrder = null; // Visual position in the list (1, 2, 3...)
+    @api showDragIcon = false;
 
     connectedCallback() {
         // Component connected

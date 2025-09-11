@@ -5,14 +5,23 @@ export default class TriggerActionsSection extends LightningElement {
     @api actions;
     @api isUpdating = false;
     @api updatingSection = null;
-    
+
     @track isExpanded = true;
     @track isEditOrderMode = false;
     @track isManualEditMode = false; // Toggle between arrow and manual edit modes
     @track originalActions = []; // Store original order for cancel
 
+    dragFromIndex;
+
     get isThisSectionUpdating() {
         return this.isUpdating && this.updatingSection === this.title;
+    }
+
+    get visualActions() {
+        return this.actions.map((action, index) => ({
+            ...action,
+            visualOrder: index + 1 // 1-based index for display
+        }));
     }
 
     connectedCallback() {
@@ -36,10 +45,10 @@ export default class TriggerActionsSection extends LightningElement {
     };
 
     handleAddAction = () => {
-        this.dispatchEvent(new CustomEvent('addaction', { 
-            detail: { 
-                sectionTitle: this.title 
-            } 
+        this.dispatchEvent(new CustomEvent('addaction', {
+            detail: {
+                sectionTitle: this.title
+            }
         }));
     };
 
@@ -60,10 +69,10 @@ export default class TriggerActionsSection extends LightningElement {
         this.originalActions = [...this.actions];
         this.isEditOrderMode = true;
         this.isManualEditMode = false; // Start with arrow mode
-        
+
         // Add isFirstItem and isLastItem properties to actions
         this.updateActionProperties();
-        
+
         // Dispatch event to parent to notify other sections to exit edit mode
         this.dispatchEvent(new CustomEvent('entereditmode', {
             detail: { sectionTitle: this.title }
@@ -86,7 +95,7 @@ export default class TriggerActionsSection extends LightningElement {
 
     handleSaveOrder() {
         let updatedActions;
-        
+
         if (this.isManualEditMode) {
             // Use manual order numbers from input fields - preserve exact values
             updatedActions = this.actions.map((action) => ({
@@ -103,7 +112,7 @@ export default class TriggerActionsSection extends LightningElement {
 
         // Dispatch event to parent with updated actions
         this.dispatchEvent(new CustomEvent('saveorder', {
-            detail: { 
+            detail: {
                 sectionTitle: this.title,
                 updatedActions: updatedActions
             }
@@ -125,11 +134,11 @@ export default class TriggerActionsSection extends LightningElement {
     handleManualOrderChange(event) {
         const { actionId, orderValue } = event.detail;
         const actionIndex = this.actions.findIndex(action => action.Id === actionId);
-        
+
         if (actionIndex !== -1) {
             // Create a new array with the updated action to maintain reactivity
-            this.actions = this.actions.map((action, index) => 
-                index === actionIndex 
+            this.actions = this.actions.map((action, index) =>
+                index === actionIndex
                     ? { ...action, manualOrder: orderValue }
                     : action
             );
@@ -139,11 +148,11 @@ export default class TriggerActionsSection extends LightningElement {
     handleManualOrderBlur(event) {
         const { actionId, orderValue } = event.detail;
         const actionIndex = this.actions.findIndex(action => action.Id === actionId);
-        
+
         if (actionIndex !== -1) {
             // Create a new array with the updated action to maintain reactivity
-            this.actions = this.actions.map((action, index) => 
-                index === actionIndex 
+            this.actions = this.actions.map((action, index) =>
+                index === actionIndex
                     ? { ...action, manualOrder: orderValue }
                     : action
             );
@@ -159,7 +168,7 @@ export default class TriggerActionsSection extends LightningElement {
             const orderB = parseFloat(b.manualOrder) || parseFloat(b.Order__c) || 0;
             return orderA - orderB;
         });
-        
+
         // Update the isFirstItem and isLastItem properties after sorting
         this.updateActionProperties();
     }
@@ -168,7 +177,7 @@ export default class TriggerActionsSection extends LightningElement {
     handleMoveAction(event) {
         const { actionId, direction } = event.detail;
         const currentIndex = this.actions.findIndex(action => action.Id === actionId);
-        
+
         if (currentIndex === -1) return;
 
         let newIndex;
@@ -183,9 +192,9 @@ export default class TriggerActionsSection extends LightningElement {
         // Swap the actions
         const newActions = [...this.actions];
         [newActions[currentIndex], newActions[newIndex]] = [newActions[newIndex], newActions[currentIndex]];
-        
+
         this.actions = newActions;
-        
+
         // Update the isFirstItem and isLastItem properties
         this.updateActionProperties();
     }
@@ -195,5 +204,52 @@ export default class TriggerActionsSection extends LightningElement {
         if (this.isEditOrderMode) {
             this.handleCancelOrder();
         }
+    }
+
+    get isDragEnabled() {
+        return this.isEditOrderMode && !this.isManualEditMode;
+    }
+
+    // start: remember FROM index (0-based)
+    handleDragStart(event) {
+        const fromOrder = Number(event.currentTarget.dataset.order); // 1-based
+        this.dragFromIndex = fromOrder - 1;
+        event.dataTransfer.effectAllowed = 'move';
+    }
+
+    handleCardDragOver(event) {
+        event.preventDefault(); // allow drop
+        event.currentTarget.style.opacity = '0.5';
+    }
+    handleCardDragLeave(event) {
+        event.currentTarget.style.opacity = '1';
+    }
+
+    // drop: compute TO index and reorder
+    handleDropOnCard(event) {
+        event.preventDefault();
+        event.currentTarget.style.opacity = '1';
+
+        const toOrder = Number(event.currentTarget.dataset.order); // 1-based
+        const toIndex = toOrder - 1;
+        const fromIndex = this.dragFromIndex;
+
+        if (Number.isNaN(fromIndex) || Number.isNaN(toIndex) || fromIndex === toIndex) return;
+
+        this.actions = this.reorderArray(this.actions, fromIndex, toIndex);
+        this.dragFromIndex = undefined;
+    }
+
+    // simple immutable move
+    reorderArray(arr, from, to) {
+        const out = arr.slice();
+        const [moved] = out.splice(from, 1);
+        out.splice(to, 0, moved);
+
+        return out.map((a, i, ary) => ({
+            ...a,
+            isFirstItem: i === 0,
+            isLastItem: i === ary.length - 1
+        }));
     }
 }
