@@ -10,6 +10,7 @@ export default class TriggerActionsSection extends LightningElement {
     @track isEditOrderMode = false;
     @track isManualEditMode = false; // Toggle between arrow and manual edit modes
     @track originalActions = []; // Store original order for cancel
+    @track isConfirmationModalOpen = false; // Control confirmation modal visibility
 
     dragFromIndex;
 
@@ -94,6 +95,14 @@ export default class TriggerActionsSection extends LightningElement {
     }
 
     handleSaveOrder() {
+        // Show confirmation modal instead of directly saving
+        this.isConfirmationModalOpen = true;
+    }
+
+    handleConfirmSaveOrder() {
+        // Close confirmation modal
+        this.isConfirmationModalOpen = false;
+        
         let updatedActions;
 
         if (this.isManualEditMode) {
@@ -121,6 +130,11 @@ export default class TriggerActionsSection extends LightningElement {
         this.isEditOrderMode = false;
         this.isManualEditMode = false;
         this.originalActions = [];
+    }
+
+    handleCancelConfirmation() {
+        // Close confirmation modal without saving
+        this.isConfirmationModalOpen = false;
     }
 
     handleCancelOrder() {

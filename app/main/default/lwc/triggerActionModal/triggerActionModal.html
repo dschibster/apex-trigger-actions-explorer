@@ -111,8 +111,8 @@
                                 onchange={handleFieldChange}
                                 data-field="DeveloperName"
                                 disabled={isDeveloperNameReadOnly}
-                                title={developerNameTooltip}
-                                required={isCreateMode}>
+                                required={isCreateMode}
+                                field-level-help={developerNameHelptext}>
                             </lightning-input>
                         </lightning-layout-item>
                         <lightning-layout-item size="6" padding="around-small">
@@ -128,14 +128,14 @@
                         
                         <!-- Row 4: Description (full width) -->
                         <lightning-layout-item size="12" padding="around-small">
-                            <lightning-input 
+                            <lightning-textarea 
                                 label="Description" 
                                 value={actionData.Description__c}
                                 onchange={handleFieldChange}
                                 data-field="Description__c"
                                 disabled={isReadOnly}
                                 required={isDescriptionRequired}>
-                            </lightning-input>
+                            </lightning-textarea>
                         </lightning-layout-item>
                         
                         <!-- Row 5: Order and Required Permission -->
@@ -202,9 +202,47 @@
                                 value={actionData.Entry_Criteria__c}
                                 onchange={handleFieldChange}
                                 data-field="Entry_Criteria__c"
-                                disabled={isReadOnly}
-                                rows="3">
+                                disabled={isEntryCriteriaFieldDisabled}
+                                rows="3"
+                                field-level-help={entryCriteriaHelptext}>
                             </lightning-textarea>
+                            
+                            <!-- Validation Result Display -->
+                            <template if:true={formulaValidationResult}>
+                                <div class="slds-m-top_small">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-text-align_left">
+                                        <template if:true={formulaValidationResult.success}>
+                                            <lightning-icon 
+                                                icon-name="utility:success" 
+                                                size="x-small" 
+                                                class="slds-m-right_x-small slds-text-color_success">
+                                            </lightning-icon>
+                                        </template>
+                                        <template if:false={formulaValidationResult.success}>
+                                            <lightning-icon 
+                                                icon-name="utility:error" 
+                                                size="x-small" 
+                                                class="slds-m-right_x-small slds-text-color_error">
+                                            </lightning-icon>
+                                        </template>
+                                        <span class={validationMessageClass}>{validationMessage}</span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Validate Button -->
+                            <template if:true={showValidateButton}>
+                                <div class="slds-m-top_small">
+                                    <lightning-button 
+                                        variant="neutral" 
+                                        label="Validate" 
+                                        icon-name="utility:check"
+                                        onclick={handleValidateFormula}
+                                        disabled={isValidatingFormula}
+                                        size="small">
+                                    </lightning-button>
+                                </div>
+                            </template>
                         </lightning-layout-item>
                     </lightning-layout>
                     </template>
@@ -234,7 +272,7 @@
                             variant="brand" 
                             label={buttonLabel}
                             onclick={handleUpdate}
-                            disabled={isUpdating}
+                            disabled={saveButtonDisabled}
                             class="slds-m-left_small">
                         </lightning-button>
                     </template>

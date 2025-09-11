@@ -28,6 +28,10 @@ export default class TriggerActionCard extends LightningElement {
     }
 
 
+    get entryCriteriaLabel() {
+        return this.action?.Entry_Criteria__c ? 'Filtered' : 'Unfiltered';
+    }
+
     get statusClass() {
         return !this.action?.Bypass_Execution__c ? 'slds-theme_success' : 'slds-theme_warning';
     }

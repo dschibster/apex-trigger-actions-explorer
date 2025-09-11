@@ -2,7 +2,7 @@
   "packageDirectories": [
     {
       "versionName": "Trigger Actions Explorer v0.1",
-      "versionNumber": "0.1.0.0",
+      "versionNumber": "0.1.2.0",
       "path": "app",
       "default": true,
       "package": "apex-trigger-actions-explorer",
@@ -21,6 +21,8 @@
   "packageAliases": {
     "apex-trigger-actions-explorer": "0HoJ8000000k9cfKAA",
     "apex-trigger-actions-framework": "04tKY000000QQ0RYAW",
-    "apex-trigger-actions-explorer@0.1.0": "04tJ8000000ooicIAA"
+    "apex-trigger-actions-explorer@0.1.0": "04tJ8000000ooicIAA",
+    "apex-trigger-actions-explorer@0.1.1": "04tJ8000000oojGIAQ",
+    "apex-trigger-actions-explorer@0.1.2": "04tJ8000000oojLIAQ"
   }
 }

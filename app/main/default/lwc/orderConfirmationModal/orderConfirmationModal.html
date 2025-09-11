@@ -1,0 +1,30 @@
+<template>
+    <template if:true={isOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" onclick={handleCancel} alternative-text="close" variant="bare-inverse" class="slds-modal__close"></lightning-button-icon>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Confirm Order Update</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <p class="slds-text-body_regular">
+                        <template if:true={isManualMode}>
+                            This will sort the Trigger Actions according to your entered values and may overwrite existing order values. 
+                            Do you want to save the order?
+                        </template>
+                        <template if:false={isManualMode}>
+                            This will sort the Trigger Actions in ascending order starting with 1 and may overwrite existing order values. 
+                            Do you want to save the order?
+                        </template>
+                    </p>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={handleCancel} class="slds-m-right_small"></lightning-button>
+                    <lightning-button variant="brand" label="Save Order" onclick={handleConfirm}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>
+

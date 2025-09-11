@@ -9,7 +9,7 @@ Trigger Actions Explorer requires the latest version of the Trigger Actions Fram
 
 #### Production
 <div>
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000ooicIAA" target="_blank">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000oojLIAQ" target="_blank">
   <img width="180" alt="Deploy to Salesforce"
        src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true"></a>
 
@@ -21,7 +21,7 @@ Trigger Actions Explorer requires the latest version of the Trigger Actions Fram
 #### Sandbox
 
 <div>
-<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000ooicIAA" target="_blank">
+<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000oojLIAQ" target="_blank">
   <img width="180" alt="Deploy to Salesforce"
        src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true"></a>
 </div>
@@ -40,6 +40,7 @@ After installation, assign yourself the "Trigger Actions Explorer" Permission Se
 * Create new SObject Trigger Settings and Actions directly from the UI
 * Automatically handles the distinction between Change Events and regular objects
 * Provides context-appropriate options for specialized objects like platform events
+* **NEW**: Validate Entry Criteria directly from UI!
 
 ## Screenshots
 

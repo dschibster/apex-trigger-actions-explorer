@@ -32,6 +32,8 @@ jobs:
               run: "sf org login sfdx-url -f ./SALESFORCE_AUTH_URL.txt -a devhub -d"
             - name: Create Scratch Org
               run: sf org create scratch --target-dev-hub devhub -d --definition-file config/project-scratch-def.json --alias ciorg -y 1
+            - name: Install TAF
+              run: sf package install --package 04tKY000000QQ0RYAW -w 50
             - name: Deploy source
               run: sf project deploy start
             - name: Run Apex tests
@@ -39,9 +41,10 @@ jobs:
             - name: Delete Scratch Org
               run: sf org delete scratch --no-prompt
             - name: Upload code coverage for Apex to Codecov.io
-              uses: codecov/codecov-action@v2
+              uses: codecov/codecov-action@v5
               with:
-                  flags: Apex
+                token: ${{ secrets.CODECOV_TOKEN }}
+                flags: Apex
             - name: Create new Package version
               if: github.event.action != 'closed' && github.event_name == 'pull_request' && github.actor == github.event.repository.owner.login
               env:
