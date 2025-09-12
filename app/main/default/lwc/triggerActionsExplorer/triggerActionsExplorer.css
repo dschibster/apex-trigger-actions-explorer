@@ -344,3 +344,10 @@
     background-repeat: none !important;
     background-size: none !important;
 }
+
+.centered-content {
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

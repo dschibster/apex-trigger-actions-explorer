@@ -40,6 +40,7 @@ After installation, assign yourself the "Trigger Actions Explorer" Permission Se
 * Create new SObject Trigger Settings and Actions directly from the UI
 * Automatically handles the distinction between Change Events and regular objects
 * Provides context-appropriate options for specialized objects like platform events
+* **NEW**: Validate Entry Criteria directly from UI!
 
 ## Screenshots
 
