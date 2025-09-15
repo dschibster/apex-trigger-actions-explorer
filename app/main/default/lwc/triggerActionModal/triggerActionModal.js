@@ -25,6 +25,7 @@ export default class TriggerActionModal extends LightningElement {
     @track formulaValidationResult = null;
     @track _isCreateDataInitialized = false;
     @track selectedActionType = 'apex'; // 'apex', 'flow', or 'flow-cdp' - default to apex
+    @track entryCriteriaHasChanged = false; // Track if Entry Criteria has been modified
 
     // Context abbreviation mapping based on triggerContext and sectionContext
     get contextAbbreviation() {
@@ -118,6 +119,7 @@ export default class TriggerActionModal extends LightningElement {
         // Clear validation result when modal opens
         this.formulaValidationResult = null;
         this.isValidatingFormula = false;
+        this.entryCriteriaHasChanged = false;
         
         if (this.mode === 'create') {
             // Initialize with empty data for creation
@@ -327,9 +329,8 @@ export default class TriggerActionModal extends LightningElement {
         if (this.isValidatingFormula) {
             return true;
         }
-        // Disable if there's Entry Criteria content but no validation result yet
-        if (this.actionData.Entry_Criteria__c && this.actionData.Entry_Criteria__c.trim().length > 0 && 
-            !this.formulaValidationResult) {
+        // Only disable if Entry Criteria has been changed and no validation result yet
+        if (this.entryCriteriaHasChanged && !this.formulaValidationResult) {
             return true;
         }
         return false;
@@ -381,9 +382,12 @@ export default class TriggerActionModal extends LightningElement {
             [field]: value
         };
         
-        // Clear formula validation result when Entry Criteria changes
+        // Track Entry Criteria changes and clear validation result
         if (field === 'Entry_Criteria__c') {
             this.formulaValidationResult = null;
+            // Check if Entry Criteria has changed from original value
+            const originalValue = this.originalData.Entry_Criteria__c || '';
+            this.entryCriteriaHasChanged = (value || '') !== originalValue;
         }
         
         // Regenerate DeveloperName and Label when Flow Name or Apex Class Name changes in create mode
@@ -527,6 +531,7 @@ export default class TriggerActionModal extends LightningElement {
         this._currentActionId = null;
         this._isCreateDataInitialized = false;
         this.selectedActionType = 'apex'; // Reset to default
+        this.entryCriteriaHasChanged = false;
     }
 
     handleClose() {
@@ -540,6 +545,8 @@ export default class TriggerActionModal extends LightningElement {
         this.selectedActionType = 'apex';
         // Clear formula validation result
         this.formulaValidationResult = null;
+        // Reset Entry Criteria change tracking
+        this.entryCriteriaHasChanged = false;
         this.dispatchEvent(new CustomEvent('close'));
     }
 
@@ -577,6 +584,8 @@ export default class TriggerActionModal extends LightningElement {
         this._isCreateDataInitialized = false;
         // Reset action type to default
         this.selectedActionType = 'apex';
+        // Reset Entry Criteria change tracking
+        this.entryCriteriaHasChanged = false;
         
         // For both create and edit modes, cancel should close the modal entirely
         this.dispatchEvent(new CustomEvent('close'));
