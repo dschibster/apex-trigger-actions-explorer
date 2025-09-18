@@ -59,6 +59,20 @@ export default class TriggerActionCard extends LightningElement {
         return `${baseUrl}/lightning/setup/CustomMetadata/page?address=%2F${this.action.Id}%3Fsetupid%3DCustomMetadata`;
     }
 
+    emitCanDrag() {
+        const dragEvent = new CustomEvent('candrag', {
+            detail: { actionId: this.action.Id }
+        });
+        this.dispatchEvent(dragEvent);
+    }
+
+    emitCannotDrag() {
+        const noDragEvent = new CustomEvent('cannotdrag', {
+            detail: { actionId: this.action.Id }
+        });
+        this.dispatchEvent(noDragEvent);
+    }
+
     handleMenuSelect(event) {
         const selectedValue = event.detail.value;
         

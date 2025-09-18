@@ -58,7 +58,7 @@
                         <div ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}
                             class="slds-list slds-has-dividers_top">
                             <template for:each={visualActions} for:item="act" for:index="index">
-                                <c-trigger-action-card show-drag-icon={isDragEnabled} key={act.Id} data-order={act.visualOrder} action={act}
+                                <c-trigger-action-card oncandrag={handleCanDragCards} oncannotdrag={handleCannotDragCards} show-drag-icon={isEditOrderMode} key={act.Id} data-order={act.visualOrder} action={act}
                                     draggable={isDragEnabled} ondragstart={handleDragStart}
                                     ondragover={handleCardDragOver} ondragleave={handleCardDragLeave}
                                     ondrop={handleDropOnCard} visual-order={act.visualOrder}

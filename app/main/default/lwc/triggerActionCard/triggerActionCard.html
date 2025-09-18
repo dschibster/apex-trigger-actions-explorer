@@ -2,7 +2,7 @@
     <div class="slds-list__item slds-border_top">
         <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-around_x-small">
             <!-- Order Number -->
-            <div if:true={showDragIcon} style="cursor: grab;" class="slds-col slds-size_1-of-12 slds-text-align_center">
+            <div if:true={showDragIcon} onmouseover={emitCanDrag} onmouseleave={emitCannotDrag} style="cursor: grab;" class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <div>
                     <lightning-icon icon-name="utility:drag_and_drop" size="small">
                     </lightning-icon>

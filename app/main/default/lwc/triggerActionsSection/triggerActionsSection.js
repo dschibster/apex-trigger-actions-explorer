@@ -13,6 +13,7 @@ export default class TriggerActionsSection extends LightningElement {
     @track isConfirmationModalOpen = false; // Control confirmation modal visibility
 
     dragFromIndex;
+    dragAllowed = false;
 
     get isThisSectionUpdating() {
         return this.isUpdating && this.updatingSection === this.title;
@@ -31,6 +32,13 @@ export default class TriggerActionsSection extends LightningElement {
 
     renderedCallback() {
         // Component rendered
+    }
+
+    handleCanDragCards = () => {
+        this.dragAllowed = true;
+    }
+    handleCannotDragCards = () => {
+        this.dragAllowed = false;
     }
 
     handleView = (event) => {
@@ -221,7 +229,7 @@ export default class TriggerActionsSection extends LightningElement {
     }
 
     get isDragEnabled() {
-        return this.isEditOrderMode && !this.isManualEditMode;
+        return this.isEditOrderMode && !this.isManualEditMode && this.dragAllowed;
     }
 
     // start: remember FROM index (0-based)
