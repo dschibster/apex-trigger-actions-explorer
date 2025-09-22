@@ -37,7 +37,7 @@ jobs:
             - name: Deploy source
               run: sf project deploy start
             - name: Run Apex tests
-              run: sf apex run test -c --resultformat human -d ./
+              run: sf apex run test -c --synchronous --result-format human -d ./
             - name: Delete Scratch Org
               run: sf org delete scratch --no-prompt
             - name: Upload code coverage for Apex to Codecov.io
