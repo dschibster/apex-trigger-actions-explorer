@@ -7,6 +7,7 @@ export default class TriggerActionCard extends LightningElement {
     @api isFirstItem = false;
     @api isLastItem = false;
     @api visualOrder = null; // Visual position in the list (1, 2, 3...)
+    @api showDragIcon = false;
 
     connectedCallback() {
         // Component connected
@@ -56,6 +57,20 @@ export default class TriggerActionCard extends LightningElement {
         // Create URL to the custom metadata record
         const baseUrl = window.location.origin;
         return `${baseUrl}/lightning/setup/CustomMetadata/page?address=%2F${this.action.Id}%3Fsetupid%3DCustomMetadata`;
+    }
+
+    emitCanDrag() {
+        const dragEvent = new CustomEvent('candrag', {
+            detail: { actionId: this.action.Id }
+        });
+        this.dispatchEvent(dragEvent);
+    }
+
+    emitCannotDrag() {
+        const noDragEvent = new CustomEvent('cannotdrag', {
+            detail: { actionId: this.action.Id }
+        });
+        this.dispatchEvent(noDragEvent);
     }
 
     handleMenuSelect(event) {
