@@ -381,4 +381,37 @@ public with sharing class TriggerActionsExplorerController {
         }
     }
     
+    /**
+     * Gets the ActiveVersionId for a Flow by its API name
+     * @param flowApiName The API name of the Flow
+     * @return String containing the ActiveVersionId (starts with 301) or null if not found
+     */
+    @AuraEnabled(cacheable=true)
+    public static String getFlowActiveVersionId(String flowApiName) {
+        try {
+            if (String.isBlank(flowApiName)) {
+                return null;
+            }
+            
+            // Query FlowDefinitionView to get the ActiveVersionId
+            List<FlowDefinitionView> flowDefinitions = [
+                SELECT ActiveVersionId, ApiName, LatestVersionId
+                FROM FlowDefinitionView
+                WHERE ApiName = :flowApiName.trim()
+                AND IsActive = true
+                LIMIT 1
+            ];
+            
+            if (flowDefinitions.isEmpty()) {
+                return null;
+            }
+            
+            // Return the ActiveVersionId which starts with 301 prefix
+            return flowDefinitions[0].ActiveVersionId;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException('Error retrieving flow version ID: ' + e.getMessage());
+        }
+    }
+    
 }
