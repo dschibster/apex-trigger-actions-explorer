@@ -357,4 +357,64 @@ public class TriggerActionsExplorerControllerTest {
         }
         Test.stopTest();
     }
+    
+    @IsTest
+    static void testGetFlowActiveVersionIdWithBlankFlowName() {
+        // Test getFlowActiveVersionId with blank/null flow name
+        Test.startTest();
+        String versionIdBlank = TriggerActionsExplorerController.getFlowActiveVersionId('');
+        String versionIdNull = TriggerActionsExplorerController.getFlowActiveVersionId(null);
+        Test.stopTest();
+        
+        // Should return null for blank/null flow names
+        System.assertEquals(null, versionIdBlank, 'Should return null for blank flow name');
+        System.assertEquals(null, versionIdNull, 'Should return null for null flow name');
+    }
+    
+    @IsTest
+    static void testGetFlowActiveVersionIdWithNonExistentFlow() {
+        // Test getFlowActiveVersionId with a flow that doesn't exist
+        String nonExistentFlowName = 'NonExistentFlow_' + System.currentTimeMillis();
+        
+        Test.startTest();
+        String versionId = TriggerActionsExplorerController.getFlowActiveVersionId(nonExistentFlowName);
+        Test.stopTest();
+        
+        // Should return null for non-existent flow
+        System.assertEquals(null, versionId, 'Should return null for non-existent flow');
+    }
+    
+    @IsTest
+    static void testGetFlowActiveVersionIdWithValidFlow() {
+        // Test getFlowActiveVersionId with a valid flow
+        // Note: This test will only pass if there's an active flow in the org
+        // We'll query for an existing flow first, or handle the case where none exists
+        
+        // Query for any active flow in the org
+        List<FlowDefinitionView> existingFlows = [
+            SELECT ApiName, ActiveVersionId
+            FROM FlowDefinitionView
+            WHERE IsActive = true
+            LIMIT 1
+        ];
+        
+        Test.startTest();
+        if (!existingFlows.isEmpty()) {
+            String flowApiName = existingFlows[0].ApiName;
+            String expectedVersionId = existingFlows[0].ActiveVersionId;
+            
+            String versionId = TriggerActionsExplorerController.getFlowActiveVersionId(flowApiName);
+            
+            // Should return the ActiveVersionId for an existing active flow
+            System.assertEquals(expectedVersionId, versionId, 'Should return the correct ActiveVersionId for existing flow');
+            System.assertNotEquals(null, versionId, 'Version ID should not be null');
+            // Verify the version ID is not empty and has a reasonable length (typically 15 or 18 characters)
+            System.assert(versionId.length() >= 15, 'Version ID should be a valid Salesforce ID');
+        } else {
+            // No active flows exist, test that method handles this gracefully
+            String versionId = TriggerActionsExplorerController.getFlowActiveVersionId('TestFlow');
+            System.assertEquals(null, versionId, 'Should return null when flow does not exist');
+        }
+        Test.stopTest();
+    }
 }

@@ -1,6 +1,9 @@
 import { LightningElement, api } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import getFlowActiveVersionId from '@salesforce/apex/TriggerActionsExplorerController.getFlowActiveVersionId';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-export default class TriggerActionCard extends LightningElement {
+export default class TriggerActionCard extends NavigationMixin(LightningElement) {
     @api action;
     @api isEditOrderMode = false;
     @api isManualEditMode = false;
@@ -48,6 +51,10 @@ export default class TriggerActionCard extends LightningElement {
         return this.action?.Flow_Name__c || this.action?.Apex_Class_Name__c || '';
     }
 
+    get isFlowAction() {
+        return !!this.action?.Flow_Name__c;
+    }
+
     get manualOrderValue() {
         // Return the manual order if set, otherwise fall back to the original order
         return this.action?.manualOrder !== undefined ? this.action.manualOrder : (this.action?.Order__c || 0);
@@ -73,7 +80,7 @@ export default class TriggerActionCard extends LightningElement {
         this.dispatchEvent(noDragEvent);
     }
 
-    handleMenuSelect(event) {
+    async handleMenuSelect(event) {
         const selectedValue = event.detail.value;
         
         switch (selectedValue) {
@@ -87,7 +94,53 @@ export default class TriggerActionCard extends LightningElement {
                     detail: { actionId: this.action.Id }
                 }));
                 break;
+            case 'flowbuilder':
+                await this.handleOpenFlowBuilder();
+                break;
         }
+    }
+
+    async handleOpenFlowBuilder() {
+        try {
+            const flowApiName = this.action?.Flow_Name__c;
+            if (!flowApiName) {
+                this.showToast('Error', 'Flow name not found', 'error');
+                return;
+            }
+
+            // Get the ActiveVersionId from Apex
+            const activeVersionId = await getFlowActiveVersionId({ flowApiName });
+            
+            if (!activeVersionId) {
+                this.showToast('Error', 'Flow not found or not active', 'error');
+                return;
+            }
+
+            // Navigate to Flow Builder using the ActiveVersionId
+            // URL format: /builder_platform_interaction/flowBuilder.app?flowId={ActiveVersionId}
+            // Use relative URL for internal Salesforce navigation
+            const flowBuilderUrl = `/builder_platform_interaction/flowBuilder.app?flowId=${activeVersionId}`;
+            
+            // Use NavigationMixin to navigate to the Flow Builder
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: flowBuilderUrl
+                }
+            });
+        } catch (error) {
+            console.error('Error opening Flow Builder:', error);
+            this.showToast('Error', 'Failed to open Flow Builder: ' + (error.body?.message || error.message), 'error');
+        }
+    }
+
+    showToast(title, message, variant) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant
+        });
+        this.dispatchEvent(evt);
     }
 
     handleMoveUp() {
