@@ -246,17 +246,28 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
         const setting = this.triggerSettings.find(s => s.Id === this.selectedSetting);
         this.selectedSettingDeveloperName = setting ? setting.DeveloperName : '';
         
-        // Auto-select context and timing based on object type
+        // Only auto-select context and timing if they're not already set
+        // Or if current selections are invalid for the new object type
         const objectApiName = setting ? setting.Object_API_Name__c : '';
+        const isChangeEvent = objectApiName && (objectApiName.endsWith('ChangeEvent') || objectApiName.endsWith('__e'));
         
-        if (objectApiName && (objectApiName.endsWith('ChangeEvent') || objectApiName.endsWith('__e'))) {
-            // For ChangeEvent objects: auto-select Created + After
+        // Only set context if not already selected, or if current context is invalid for this object
+        if (!this.selectedContext || (isChangeEvent && this.selectedContext !== 'CREATED')) {
             this.selectedContext = 'CREATED';
+        }
+        
+        // Only set timing if not already selected, or if current timing is invalid for the context
+        if (!this.selectedTiming) {
+            if (isChangeEvent) {
+                this.selectedTiming = 'AFTER';
+            } else if (this.selectedContext === 'RESTORED') {
+                this.selectedTiming = 'AFTER';
+            } else {
+                this.selectedTiming = 'BEFORE';
+            }
+        } else if (this.selectedContext === 'RESTORED' && this.selectedTiming !== 'AFTER') {
+            // RESTORED context only supports AFTER timing
             this.selectedTiming = 'AFTER';
-        } else {
-            // For regular objects: auto-select Created + Before
-            this.selectedContext = 'CREATED';
-            this.selectedTiming = 'BEFORE';
         }
         
         // Update display actions if we have both selections
@@ -268,13 +279,19 @@ export default class TriggerActionsExplorer extends NavigationMixin(LightningEle
     async handleContextChange(event) {
         this.selectedContext = event.detail.value;
         
-        // Auto-select timing based on context
+        // Only auto-select timing if not already selected, or if current timing is invalid for the new context
         if (this.selectedContext === 'RESTORED') {
-            // For Restored context: auto-select After
-            this.selectedTiming = 'AFTER';
+            // For Restored context: only After is valid, so force it if needed
+            if (this.selectedTiming !== 'AFTER') {
+                this.selectedTiming = 'AFTER';
+            }
         } else {
-            // For other contexts: auto-select Before
-            this.selectedTiming = 'BEFORE';
+            // For other contexts: preserve existing timing if valid, otherwise default to Before
+            // Only change if timing is not set or if it's invalid (e.g., if it was AFTER from RESTORED)
+            if (!this.selectedTiming) {
+                this.selectedTiming = 'BEFORE';
+            }
+            // Note: We preserve the user's timing selection (BEFORE/AFTER/BOTH) for non-RESTORED contexts
         }
         
         // Update display actions if we have both selections
