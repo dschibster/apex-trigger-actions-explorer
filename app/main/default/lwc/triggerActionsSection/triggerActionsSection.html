@@ -1,59 +1,37 @@
 <template>
-    <c-order-confirmation-modal 
+    <c-trigger-actions-confirmation-modal 
         is-open={isConfirmationModalOpen}
         is-manual-mode={isManualEditMode}
         onconfirm={handleConfirmSaveOrder}
         oncancel={handleCancelConfirmation}>
-    </c-order-confirmation-modal>
+    </c-trigger-actions-confirmation-modal>
     
     <div class="slds-card">
         <div class="slds-card__header slds-card__header_toggle">
             <div class="slds-grid slds-grid_align-spread">
                 <div class="slds-media slds-media_center" onclick={handleToggle} style="cursor: pointer;">
                     <lightning-icon icon-name={chevronIcon} size="small" class={chevronClass}></lightning-icon>
-                    <h3 class="slds-text-heading_medium">{title}</h3>
+                    <h3 class="slds-text-heading_medium" style="line-height: 1;">{title}</h3>
                 </div>
                 <div class="slds-no-flex">
                     <template if:false={isEditOrderMode}>
-                        <lightning-button 
-                            variant="neutral" 
-                            label="Add Action" 
-                            icon-name="utility:add"
-                            size="small"
-                            onclick={handleAddAction}
-                            class="slds-m-right_small">
+                        <lightning-button variant="neutral" label="Add Action" icon-name="utility:add" size="small"
+                            onclick={handleAddAction} class="slds-m-right_small">
                         </lightning-button>
-                        <lightning-button 
-                            variant="neutral" 
-                            label="Edit Order" 
-                            icon-name="utility:sort"
-                            size="small"
-                            onclick={handleEditOrder}
-                            class="slds-m-right_small">
+                        <lightning-button variant="neutral" label="Edit Order" icon-name="utility:sort" size="small"
+                            onclick={handleEditOrder} class="slds-m-right_small">
                         </lightning-button>
                     </template>
                     <template if:true={isEditOrderMode}>
                         <div class="slds-grid slds-grid_align-center">
                             <span class="slds-text-body_small slds-m-right_x-small">Manual:</span>
-                            <lightning-input 
-                                type="toggle" 
-                                checked={isManualEditMode}
-                                onchange={handleToggleManualMode}
+                            <lightning-input type="toggle" checked={isManualEditMode} onchange={handleToggleManualMode}
                                 class="slds-m-right_small">
                             </lightning-input>
-                            <lightning-button 
-                                variant="brand" 
-                                label="Save Order" 
-                                icon-name="utility:check"
-                                size="small"
-                                onclick={handleSaveOrder}
-                                class="slds-m-right_small">
+                            <lightning-button variant="brand" label="Save Order" icon-name="utility:check" size="small"
+                                onclick={handleSaveOrder} class="slds-m-right_small">
                             </lightning-button>
-                            <lightning-button 
-                                variant="neutral" 
-                                label="Cancel" 
-                                icon-name="utility:close"
-                                size="small"
+                            <lightning-button variant="neutral" label="Cancel" icon-name="utility:close" size="small"
                                 onclick={handleCancelOrder}>
                             </lightning-button>
                         </div>
@@ -73,24 +51,20 @@
                         </div>
                     </div>
                 </template>
-                
+
                 <!-- Section Content -->
                 <template if:false={isThisSectionUpdating}>
-                    <template if:true={actions}>
-                        <div class="slds-list slds-has-dividers_top">
-                            <template for:each={actions} for:item="act" for:index="index">
-                                <c-trigger-action-card 
-                                    key={act.Id} 
-                                    action={act}
-                                    visual-order={index}
-                                    is-edit-order-mode={isEditOrderMode}
-                                    is-manual-edit-mode={isManualEditMode}
-                                    is-first-item={act.isFirstItem}
-                                    is-last-item={act.isLastItem}
-                                    onview={handleView}
-                                    onedit={handleEdit}
-                                    ondelete={handleDelete}
-                                    onmoveaction={handleMoveAction}
+                    <template if:true={visualActions}>
+                        <div ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}
+                            class="slds-list slds-has-dividers_top">
+                            <template for:each={visualActions} for:item="act" for:index="index">
+                                <c-trigger-action-card oncandrag={handleCanDragCards} oncannotdrag={handleCannotDragCards} show-drag-icon={isEditOrderMode} key={act.Id} data-order={act.visualOrder} action={act}
+                                    draggable={isDragEnabled} ondragstart={handleDragStart}
+                                    ondragover={handleCardDragOver} ondragleave={handleCardDragLeave}
+                                    ondrop={handleDropOnCard} visual-order={act.visualOrder}
+                                    is-edit-order-mode={isEditOrderMode} is-manual-edit-mode={isManualEditMode}
+                                    is-first-item={act.isFirstItem} is-last-item={act.isLastItem} onview={handleView}
+                                    onedit={handleEdit} ondelete={handleDelete} onmoveaction={handleMoveAction}
                                     onmanualorderchange={handleManualOrderChange}
                                     onmanualorderblur={handleManualOrderBlur}>
                                 </c-trigger-action-card>
@@ -99,9 +73,11 @@
                     </template>
                     <template if:false={actions}>
                         <div class="slds-text-align_center slds-p-around_large">
-                            <lightning-icon icon-name="utility:info" size="small" class="slds-m-bottom_small"></lightning-icon>
+                            <lightning-icon icon-name="utility:info" size="small"
+                                class="slds-m-bottom_small"></lightning-icon>
                             <p class="slds-text-color_weak slds-text-body_regular">No actions found</p>
-                            <p class="slds-text-color_weak slds-text-body_small slds-m-top_x-small">Click "Add Action" to create your first trigger action</p>
+                            <p class="slds-text-color_weak slds-text-body_small slds-m-top_x-small">Click "Add Action"
+                                to create your first trigger action</p>
                         </div>
                     </template>
                 </template>

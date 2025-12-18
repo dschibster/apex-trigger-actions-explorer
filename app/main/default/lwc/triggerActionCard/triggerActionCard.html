@@ -2,6 +2,12 @@
     <div class="slds-list__item slds-border_top">
         <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-around_x-small">
             <!-- Order Number -->
+            <div if:true={showDragIcon} onmouseover={emitCanDrag} onmouseleave={emitCannotDrag} style="cursor: grab;" class="slds-col slds-size_1-of-12 slds-text-align_center">
+                <div>
+                    <lightning-icon icon-name="utility:drag_and_drop" size="small">
+                    </lightning-icon>
+                </div>
+            </div>
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <template if:false={isEditOrderMode}>
                     <span class="slds-text-heading_small slds-text-color_weak">{displayOrder}</span>
@@ -9,56 +15,35 @@
                 <template if:true={isEditOrderMode}>
                     <template if:false={isManualEditMode}>
                         <div class="slds-grid slds-grid_vertical slds-grid_align-center compact-order-controls">
-                            <lightning-button-icon
-                                variant="neutral"
-                                icon-name="utility:up"
-                                size="x-small"
-                                title="Move Up"
-                                onclick={handleMoveUp}
-                                disabled={isFirstItem}
+                            <lightning-button-icon variant="neutral" icon-name="utility:up" size="x-small"
+                                title="Move Up" onclick={handleMoveUp} disabled={isFirstItem}
                                 class="slds-m-bottom_xx-small compact-button">
                             </lightning-button-icon>
-                            <lightning-button-icon
-                                variant="neutral"
-                                icon-name="utility:down"
-                                size="x-small"
-                                title="Move Down"
-                                onclick={handleMoveDown}
-                                disabled={isLastItem}
-                                class="compact-button">
+                            <lightning-button-icon variant="neutral" icon-name="utility:down" size="x-small"
+                                title="Move Down" onclick={handleMoveDown} disabled={isLastItem} class="compact-button">
                             </lightning-button-icon>
                         </div>
                     </template>
                     <template if:true={isManualEditMode}>
-                        <lightning-input
-                            type="number"
-                            value={manualOrderValue}
-                            step="0.0001"
-                            min="0"
-                            max="999999.9999"
-                            onchange={handleManualOrderChange}
-                            onblur={handleManualOrderBlur}
-                            variant="label-hidden"
+                        <lightning-input type="number" value={manualOrderValue} step="0.0001" min="0" max="999999.9999"
+                            onchange={handleManualOrderChange} onblur={handleManualOrderBlur} variant="label-hidden"
                             class="slds-p-left_small slds-grid slds-grid_vertical slds-grid_align-center">
                         </lightning-input>
                     </template>
                 </template>
             </div>
-            
+
             <!-- Icon -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                 <div>
-                    <lightning-icon 
-                        class="icon-container slds-p-around_xx-small"
-                        icon-name={iconName} 
-                        size="small"
+                    <lightning-icon class="icon-container slds-p-around_xx-small" icon-name={iconName} size="small"
                         variant="inverse">
                     </lightning-icon>
                 </div>
             </div>
-            
+
             <!-- Title and Description -->
-            <div class="slds-col slds-size_7-of-12">
+            <div class="slds-col slds-size_6-of-12">
                 <div class="slds-grid slds-grid_vertical">
                     <div class="slds-grid slds-grid_wrap slds-grid_align-spread">
                         <div class="slds-grid slds-grid_wrap">
@@ -71,37 +56,29 @@
                                 <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
                                 <span class="slds-text-color_weak slds-text-body_small">{classOrFlowName}</span>
                             </template>
-                            <span role="separator" class="slds-text-color_weak slds-m-horizontal_x-small">•</span>
-                            <span class="slds-text-color_weak slds-text-body_small">{entryCriteriaLabel}</span>
                         </div>
                     </div>
                     <p class="slds-text-body_small slds-text-color_weak slds-truncate">{action.Description__c}</p>
                 </div>
             </div>
-            
+
             <!-- Status Badge -->
             <div class="slds-col slds-size_2-of-12 slds-text-align_center">
-                <lightning-badge 
-                    label={statusLabel} 
-                    class={statusClass}>
+                <lightning-badge label={statusLabel} class={statusClass}>
                 </lightning-badge>
             </div>
 
-
             <!-- Chevron Dropdown -->
             <div class="slds-col slds-size_1-of-12 slds-text-align_center">
-                <lightning-button-menu 
-                    variant="border-filled" 
-                    icon-name="utility:down"
-                    size="small"
-                    onselect={handleMenuSelect}
-                    class="slds-dropdown-trigger slds-dropdown-trigger_click">
-                    <lightning-menu-item value="view" label="View Details"></lightning-menu-item>
-                    <lightning-menu-item value="edit" label="Edit"></lightning-menu-item>
+                <lightning-button-menu variant="border-filled" icon-name="utility:down" size="small"
+                    onselect={handleMenuSelect} class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                    <lightning-menu-item value="view" label="View Action Details"></lightning-menu-item>
+                    <lightning-menu-item value="edit" label="Edit Action"></lightning-menu-item>
+                    <template if:true={isFlowAction}>
+                        <lightning-menu-item value="flowbuilder" label="Open in Flow Builder"></lightning-menu-item>
+                    </template>
                 </lightning-button-menu>
             </div>
         </div>
     </div>
 </template>
-
-

@@ -1,60 +1,61 @@
 name: Code Coverage and Release
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - "app/**"
-    pull_request:
-        branches:
-            - main
-        paths:
-            - "app/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "app/**"
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-              with:
-                  ref: ${{ github.head_ref }}
-            - name: "Install Salesforce CLI"
-              run: |
-                  wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
-                  mkdir ~/sfdx
-                  tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
-                  echo "$HOME/sfdx/bin" >> $GITHUB_PATH
-                  ~/sfdx/bin/sfdx version
-            - name: Populate auth file
-              run: 'echo "${{ secrets.SFDX_AUTH_URL }}" > ./SALESFORCE_AUTH_URL.txt'
-            - name: Authenticate Dev Hub
-              run: "sf org login sfdx-url -f ./SALESFORCE_AUTH_URL.txt -a devhub -d"
-            - name: Create Scratch Org
-              run: sf org create scratch --target-dev-hub devhub -d --definition-file config/project-scratch-def.json --alias ciorg -y 1
-            - name: Install TAF
-              run: sf package install --package 04tKY000000QQ0RYAW -w 50
-            - name: Deploy source
-              run: sf project deploy start
-            - name: Run Apex tests
-              run: sf apex run test -c --resultformat human -d ./
-            - name: Delete Scratch Org
-              run: sf org delete scratch --no-prompt
-            - name: Upload code coverage for Apex to Codecov.io
-              uses: codecov/codecov-action@v5
-              with:
-                token: ${{ secrets.CODECOV_TOKEN }}
-                flags: Apex
-            - name: Create new Package version
-              if: github.event.action != 'closed' && github.event_name == 'pull_request' && github.actor == github.event.repository.owner.login
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  REPO_NAME: ${{ github.repository }}
-              run: |
-                  chmod +x scripts/create-new-package-version.sh
-                  ./scripts/create-new-package-version.sh
-            - name: Promote current latest Package version
-              if: github.ref == 'refs/heads/main' && github.actor == github.event.repository.owner.login
-              run: |
-                  chmod +x scripts/promote-latest-package-version.sh
-                  ./scripts/promote-latest-package-version.sh
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: "Setup node"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+      - name: "Install Salesforce CLI"
+        run: |
+          npm install -g @salesforce/cli
+      - name: Populate auth file
+        run: 'echo "${{ secrets.SFDX_AUTH_URL }}" > ./SALESFORCE_AUTH_URL.txt'
+      - name: Authenticate Dev Hub
+        run: "sf org login sfdx-url -f ./SALESFORCE_AUTH_URL.txt -a devhub -d"
+      - name: Create Scratch Org
+        run: sf org create scratch --target-dev-hub devhub -d --definition-file config/project-scratch-def.json --alias ciorg -y 1
+      - name: Install TAF
+        run: sf package install --package 04tKY000000QQ0RYAW -w 50
+      - name: Deploy source
+        run: sf project deploy start
+      - name: Run Apex tests
+        run: sf apex run test -c --synchronous --result-format human -d ./
+      - name: Delete Scratch Org
+        run: sf org delete scratch --no-prompt
+      - name: Upload code coverage for Apex to Codecov.io
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: Apex
+      - name: Create new Package version
+        if: github.event.action != 'closed' && github.event_name == 'pull_request' && github.actor == github.event.repository.owner.login
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          chmod +x scripts/create-new-package-version.sh
+          ./scripts/create-new-package-version.sh
+      - name: Promote current latest Package version
+        if: github.ref == 'refs/heads/main' && github.actor == github.event.repository.owner.login
+        run: |
+          chmod +x scripts/promote-latest-package-version.sh
+          ./scripts/promote-latest-package-version.sh

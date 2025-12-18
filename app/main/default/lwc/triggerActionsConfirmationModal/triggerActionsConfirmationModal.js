@@ -1,6 +1,6 @@
 import { LightningElement, api } from 'lwc';
 
-export default class OrderConfirmationModal extends LightningElement {
+export default class TriggerActionsConfirmationModal extends LightningElement {
     @api isOpen = false;
     @api isManualMode = false;
 
@@ -29,4 +29,3 @@ export default class OrderConfirmationModal extends LightningElement {
         this.dispatchEvent(new CustomEvent('confirm'));
     }
 }
-

@@ -3,12 +3,12 @@
 ## Unlocked Package Installation
 
 #### Production
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000oojLIAQ" target="_blank">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000ToFhIAK" target="_blank">
   <img width="180" alt="Deploy to Salesforce"
        src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true"></a>
 
 #### Sandbox
-<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000oojLIAQ" target="_blank">
+<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tJ8000000ToFhIAK" target="_blank">
   <img width="180" alt="Deploy to Salesforce"
        src="https://github.com/dschibster/apex-trigger-actions-explorer/blob/main/res/deploy_unlocked.png?raw=true"></a>
 
