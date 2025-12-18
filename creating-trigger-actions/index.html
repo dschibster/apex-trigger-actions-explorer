@@ -1,0 +1,1591 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../creating-trigger-settings/">
+      
+      
+        <link rel="next" href="../sorting-trigger-actions/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
+    
+    
+      
+        <title>Creating Trigger Actions - Trigger Actions Explorer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.bcfcd587.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#creating-trigger-actions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Trigger Actions Explorer" class="md-header__button md-logo" aria-label="Trigger Actions Explorer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Trigger Actions Explorer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Creating Trigger Actions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dschibster/apex-trigger-actions-explorer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    dschibster/apex-trigger-actions-explorer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Trigger Actions Explorer" class="md-nav__button md-logo" aria-label="Trigger Actions Explorer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Trigger Actions Explorer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dschibster/apex-trigger-actions-explorer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    dschibster/apex-trigger-actions-explorer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-trigger-settings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating Trigger Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Creating Trigger Actions
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Creating Trigger Actions
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-trigger-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are Trigger Actions?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-new-trigger-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a New Trigger Action
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a New Trigger Action">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-access-the-creation-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Access the Creation Interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-choose-action-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Choose Action Type
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Choose Action Type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#apex-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apex Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flow Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-cdp-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flow (CDP) Actions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-configure-basic-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Configure Basic Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Configure Basic Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#developer-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Developer Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#label" class="md-nav__link">
+    <span class="md-ellipsis">
+      Label
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-execution-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Configure Execution Settings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Configure Execution Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entry-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entry Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-permission" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Permission
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-configure-execution-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Configure Execution Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Configure Execution Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bypass-permission" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bypass Permission
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bypass-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bypass Execution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description-of-what-means-what-in-a-trigger-action-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description of What Means What in a Trigger Action Card
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Description of What Means What in a Trigger Action Card">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#card-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Card Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluate-entry-criteria-directly-in-the-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluate Entry Criteria Directly in the UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evaluate Entry Criteria Directly in the UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accessing-formula-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing Formula Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#success" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-existing-trigger-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Managing Existing Trigger Actions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Managing Existing Trigger Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#editing-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editing Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deleting Actions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming Conventions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entry-criteria-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entry Criteria Design
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formula-validation-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Formula validation failed"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-not-executing" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Action not executing"
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Errors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syntax Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#field-reference-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Field Reference Errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sorting-trigger-actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sorting Trigger Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-trigger-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are Trigger Actions?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-new-trigger-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a New Trigger Action
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a New Trigger Action">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-access-the-creation-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Access the Creation Interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-choose-action-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Choose Action Type
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Choose Action Type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#apex-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Apex Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flow Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-cdp-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flow (CDP) Actions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-configure-basic-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Configure Basic Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Configure Basic Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#developer-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Developer Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#label" class="md-nav__link">
+    <span class="md-ellipsis">
+      Label
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-execution-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Configure Execution Settings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Configure Execution Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entry-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entry Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-permission" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Permission
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-configure-execution-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Configure Execution Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Configure Execution Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bypass-permission" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bypass Permission
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bypass-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bypass Execution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description-of-what-means-what-in-a-trigger-action-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description of What Means What in a Trigger Action Card
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Description of What Means What in a Trigger Action Card">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#card-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Card Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluate-entry-criteria-directly-in-the-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluate Entry Criteria Directly in the UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evaluate Entry Criteria Directly in the UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accessing-formula-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing Formula Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#success" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-existing-trigger-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Managing Existing Trigger Actions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Managing Existing Trigger Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#editing-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editing Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deleting Actions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming Conventions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entry-criteria-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entry Criteria Design
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formula-validation-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Formula validation failed"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-not-executing" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Action not executing"
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Errors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syntax Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#field-reference-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Field Reference Errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="creating-trigger-actions">Creating Trigger Actions</h1>
+<p>Trigger Actions define the specific logic that executes when triggers fire on your configured objects. This guide covers creating, editing, and managing trigger actions within the Trigger Actions Explorer.</p>
+<h2 id="what-are-trigger-actions">What are Trigger Actions?</h2>
+<p>Trigger Actions are custom metadata records that define:</p>
+<ul>
+<li><strong>Action Type</strong>: Apex class or Flow execution</li>
+<li><strong>Execution Context</strong>: Before/After Insert/Update/Delete/Undelete</li>
+<li><strong>Entry Criteria</strong>: Formula-based conditions for execution</li>
+<li><strong>Order</strong>: Execution sequence within the same context</li>
+<li><strong>Permissions</strong>: Required and bypass permissions</li>
+<li><strong>Description</strong>: Documentation of the action's purpose</li>
+</ul>
+<h2 id="creating-a-new-trigger-action">Creating a New Trigger Action</h2>
+<h3 id="step-1-access-the-creation-interface">Step 1: Access the Creation Interface</h3>
+<ol>
+<li>Select your <strong>Trigger Setting</strong> from the SObject dropdown</li>
+<li>Choose the appropriate <strong>Context</strong> (Before/After)</li>
+<li>Select the <strong>Timing</strong> (Insert/Update/Delete/Undelete)</li>
+<li>Click <strong>Add Action</strong> in the desired section (Before Actions or After Actions)</li>
+</ol>
+<h3 id="step-2-choose-action-type">Step 2: Choose Action Type</h3>
+<p>The modal will present different action types based on your object selection:</p>
+<h4 id="apex-actions">Apex Actions</h4>
+<ul>
+<li><strong>Use case</strong>: Custom business logic, complex processing</li>
+<li><strong>Class Name</strong>: Enter the Apex class that contains your logic</li>
+<li><strong>Example</strong>: <code>AccountValidationHandler</code>, <code>ContactDuplicateCheck</code></li>
+</ul>
+<h4 id="flow-actions">Flow Actions</h4>
+<ul>
+<li><strong>Use case</strong>: Declarative automation, simple business rules</li>
+<li><strong>Flow Name</strong>: Enter the Flow API name</li>
+<li><strong>Recursion Control</strong>: Allow or prevent recursive execution</li>
+</ul>
+<h4 id="flow-cdp-actions">Flow (CDP) Actions</h4>
+<ul>
+<li><strong>Use case</strong>: Change Data Platform events (ChangeEvent objects only)</li>
+<li><strong>Availability</strong>: Only shown for objects ending with <code>ChangeEvent</code></li>
+<li><strong>Flow Name</strong>: Enter the Flow API name for CDP processing</li>
+</ul>
+<h3 id="step-3-configure-basic-information">Step 3: Configure Basic Information</h3>
+<h4 id="developer-name">Developer Name</h4>
+<ul>
+<li><strong>Auto-generated</strong>: Based on your selections and context</li>
+<li><strong>Format</strong>: <code>{Actioniname}_{ContextName}</code></li>
+<li><strong>Example</strong>: <code>AccountSetName_BI</code>, <code>AccountSetRiskClass_BU</code></li>
+<li><strong>Note</strong>: Cannot be changed after creation</li>
+</ul>
+<h4 id="label">Label</h4>
+<ul>
+<li><strong>Required</strong>: User-friendly name for the action</li>
+<li><strong>Examples</strong>: "Validate Account Data", "Update Contact Status", "Create Opportunity Tasks"</li>
+<li><strong>Note</strong>: This appears in the action card display</li>
+</ul>
+<h4 id="description">Description</h4>
+<ul>
+<li><strong>Required</strong>: Detailed explanation of what the action does</li>
+<li><strong>Examples</strong>: "Validates account data before saving", "Updates contact status based on email domain"</li>
+<li><strong>Note</strong>: Helps other developers understand the action's purpose</li>
+</ul>
+<h3 id="step-4-configure-execution-settings">Step 4: Configure Execution Settings</h3>
+<h4 id="order">Order</h4>
+<ul>
+<li><strong>Purpose</strong>: Determines execution sequence within the same context</li>
+<li><strong>Format</strong>: Decimal numbers (e.g., 1.0, 1.5, 2.0)</li>
+<li><strong>Note</strong>: Lower numbers execute first, can be ordered inside of the app</li>
+</ul>
+<h4 id="entry-criteria">Entry Criteria</h4>
+<ul>
+<li><strong>Purpose</strong>: Formula-based conditions for when the action should execute</li>
+<li><strong>Format</strong>: Salesforce formula syntax</li>
+<li><strong>Examples</strong>: </li>
+<li><code>NOT(ISBLANK(record.Email))</code></li>
+<li><code>AND(record.Type = "Customer", ISPICKVAL(record.Status,"Active"))</code></li>
+<li><code>record.Amount &gt; 10000</code></li>
+<li><strong>Note</strong>: Only executes when formula evaluates to <code>true</code></li>
+</ul>
+<h4 id="required-permission">Required Permission</h4>
+<ul>
+<li><strong>Optional</strong>: Permission required to execute this action</li>
+<li><strong>Examples</strong>: <code>CustomPermission</code>, <code>SystemPermission</code></li>
+<li><strong>Note</strong>: Users without this permission will skip this action</li>
+</ul>
+<h3 id="step-5-configure-execution-control">Step 5: Configure Execution Control</h3>
+<h4 id="bypass-permission">Bypass Permission</h4>
+<ul>
+<li><strong>Optional</strong>: Permission that allows bypassing this specific action</li>
+<li><strong>Examples</strong>: <code>BypassValidation</code>, <code>AdminOverride</code></li>
+<li><strong>Note</strong>: Users with this permission will skip this action</li>
+</ul>
+<h4 id="bypass-execution">Bypass Execution</h4>
+<ul>
+<li><strong>Checkbox</strong>: When checked, disables this specific action</li>
+<li><strong>Use case</strong>: Temporarily disable an action without deleting it</li>
+<li><strong>Note</strong>: Useful for troubleshooting or maintenance</li>
+</ul>
+<h2 id="description-of-what-means-what-in-a-trigger-action-card">Description of What Means What in a Trigger Action Card</h2>
+<p>Each trigger action is displayed as a card with the following content:</p>
+<h3 id="card-structure">Card Structure</h3>
+<ul>
+<li><strong>Order</strong>: Execution order number</li>
+<li><strong>Header</strong>: Action Label, Action Type, Action Name (Class/Flow), and Entry Criteria indicator</li>
+<li><strong>Description</strong>: The detailed explanation you provided</li>
+<li><strong>Badge</strong>: Active/Bypassed status indicator</li>
+</ul>
+<h2 id="evaluate-entry-criteria-directly-in-the-ui">Evaluate Entry Criteria Directly in the UI</h2>
+<p>The Trigger Actions Explorer includes built-in formula validation to help you create accurate Entry Criteria.</p>
+<h3 id="accessing-formula-validation">Accessing Formula Validation</h3>
+<ol>
+<li><strong>Create or Edit</strong> a trigger action</li>
+<li><strong>Enter your formula</strong> in the Entry Criteria field</li>
+<li><strong>Click the Validate button</strong> (appears below the Text Area)</li>
+</ol>
+<h3 id="validation-process">Validation Process</h3>
+<p>The validation system:</p>
+<ol>
+<li><strong>Checks syntax</strong>: Ensures your formula is syntactically correct</li>
+<li><strong>Validates field references</strong>: Confirms referenced fields exist on the object</li>
+<li><strong>Tests formula logic</strong>: Verifies the formula can be evaluated</li>
+<li><strong>Returns results</strong>: Shows success or detailed error messages</li>
+</ol>
+<h3 id="validation-results">Validation Results</h3>
+<h4 id="success">Success</h4>
+<ul>
+<li><strong>Green checkmark icon</strong> with "Valid!" message</li>
+<li><strong>Save button enabled</strong>: You can proceed with saving</li>
+<li><strong>Confidence</strong>: Your formula will work in production</li>
+</ul>
+<h4 id="error">Error</h4>
+<ul>
+<li><strong>Red error icon</strong> with detailed error message</li>
+<li><strong>Save button disabled</strong>: Prevents saving invalid formulas</li>
+<li><strong>Error details</strong>: Specific information about what's wrong</li>
+</ul>
+<h2 id="managing-existing-trigger-actions">Managing Existing Trigger Actions</h2>
+<h3 id="editing-actions">Editing Actions</h3>
+<ol>
+<li><strong>Click the Edit button</strong> (pencil icon) on any action card</li>
+<li><strong>Make your changes</strong> in the modal</li>
+<li><strong>Validate Entry Criteria</strong> if modified</li>
+<li><strong>Click Save</strong> to update the action</li>
+</ol>
+<h3 id="viewing-actions">Viewing Actions</h3>
+<ol>
+<li><strong>Click the View button</strong> (eye icon) on any action card</li>
+<li><strong>Review all details</strong> in read-only mode</li>
+<li><strong>Close the modal</strong> when finished</li>
+</ol>
+<h3 id="deleting-actions">Deleting Actions</h3>
+<p>This is currently not supported by the Apex Metadata API. To delete an action, click the Action Label (highlighted blue) to visit the Metadata Record and delete it from there.</p>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="naming-conventions">Naming Conventions</h3>
+<ul>
+<li><strong>Labels</strong>: Use descriptive, business-friendly names</li>
+<li><strong>Descriptions</strong>: Provide clear explanations of purpose</li>
+<li><strong>Developer Names</strong>: Let the system auto-generate for consistency</li>
+</ul>
+<h3 id="entry-criteria-design">Entry Criteria Design</h3>
+<ul>
+<li><strong>Test thoroughly</strong>: Use the validation feature</li>
+<li><strong>Keep it simple</strong>: Avoid overly complex formulas</li>
+<li><strong>Document logic</strong>: Explain complex conditions in descriptions</li>
+</ul>
+<h3 id="permission-management">Permission Management</h3>
+<ul>
+<li><strong>Use sparingly</strong>: Only add permissions when necessary</li>
+<li><strong>Document requirements</strong>: Explain why permissions are needed</li>
+<li><strong>Test with different users</strong>: Verify permission behavior</li>
+</ul>
+<h3 id="order-management">Order Management</h3>
+<ul>
+<li><strong>Plan execution order</strong>: Consider dependencies between actions</li>
+<li><strong>Use decimal ordering</strong>: Allows for easy insertion of new actions</li>
+<li><strong>Document dependencies</strong>: Note which actions depend on others</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<h4 id="formula-validation-failed">"Formula validation failed"</h4>
+<ul>
+<li>Check formula syntax</li>
+<li>Verify field names are correct</li>
+<li>Ensure object has the referenced fields</li>
+</ul>
+<h4 id="action-not-executing">"Action not executing"</h4>
+<ul>
+<li>Check Entry Criteria formula</li>
+<li>Verify action is not bypassed</li>
+<li>Confirm execution order is correct</li>
+</ul>
+<h3 id="validation-errors">Validation Errors</h3>
+<h4 id="syntax-errors">Syntax Errors</h4>
+<ul>
+<li><strong>Missing parentheses</strong>: Check for balanced parentheses</li>
+<li><strong>Invalid operators</strong>: Use correct comparison operators</li>
+<li><strong>Field references</strong>: Ensure field names are exact</li>
+</ul>
+<h4 id="field-reference-errors">Field Reference Errors</h4>
+<ul>
+<li><strong>Non-existent fields</strong>: Verify fields exist on the object</li>
+<li><strong>Incorrect field types</strong>: Check field data types</li>
+<li><strong>Permission issues</strong>: Ensure access to referenced fields</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<p>After creating your trigger actions:</p>
+<ol>
+<li><a href="../sorting-trigger-actions/">Organize execution order</a> using the sorting features</li>
+<li>Test your configurations thoroughly</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.1e8ae164.min.js"></script>
+      
+    
+  </body>
+</html>
